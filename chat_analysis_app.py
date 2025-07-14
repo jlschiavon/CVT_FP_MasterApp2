@@ -4,6 +4,7 @@ import unicodedata
 from datetime import datetime, timedelta
 from io import BytesIO
 import pandas as pd
+import difflib
 
 # ---------- CONFIGURACIÓN ----------
 PALABRAS_CLAVE = [
@@ -12,7 +13,8 @@ PALABRAS_CLAVE = [
     "R31", "R13", "R33", "R34", "R 19", "R 24", "R 17", "R 20", "R 31", "R 13", "R 33", "R 34",
     "Recken19", "Recken24", "Recken17", "Recken20", "Recken31", "Recken13", "Recken33", "Recken34",
     "VPK 1", "VPK 2", "VPK1", "VPK2", "Plato Vibrador", "Lavadora", "Lavadoras",
-    "Lavadora 1", "Lavadora 2", "lavadora 1", "lavadora 2", "recken", "reckens", "r19", "plato vibrador", "Plato vibrador 1", "Plato vibrador 2"
+    "Lavadora 1", "Lavadora 2", "lavadora 1", "lavadora 2", "recken", "reckens", "r19",
+    "plato vibrador", "Plato vibrador 1", "Plato vibrador 2"
 ]
 
 MAQUINAS_VALIDAS = [
@@ -22,6 +24,11 @@ MAQUINAS_VALIDAS = [
     "Etiquetadora / cámara verificación etiquetas 1",
     "Etiquetadora / cámara verificación etiquetas 2",
     "Plato Vibrador 1", "Plato Vibrador 2"
+]
+
+VARIACIONES_EN_PRODUCCION = [
+    "en producción", "en produccion", "en produción", "EN PRODUCCIÓN",
+    "En produccion", "En Producción", "EN PRODUCCION", "EN PRODUCION"
 ]
 
 IMAGE_OMITTED_MESSAGE = "image omitted"
@@ -116,6 +123,42 @@ def extraer_datos_estructurados(mensaje, fecha_hora):
 
     return datos
 
+def contiene_frase_respuesta(texto):
+    texto = texto.lower()
+    for variante in VARIACIONES_EN_PRODUCCION:
+        if difflib.SequenceMatcher(None, texto, variante.lower()).ratio() > 0.8:
+            return True
+        if variante.lower() in texto:
+            return True
+    return False
+
+def detectar_respuestas(datos):
+    respuestas = []
+    for i in range(1, len(datos)):
+        actual = datos[i]
+        anterior = datos[i - 1]
+
+        palabras = actual["Mensaje completo"].split()
+        if len(palabras) > 40:
+            continue
+
+        if not contiene_frase_respuesta(actual["Mensaje completo"]):
+            continue
+
+        hora_actual = datetime.strptime(actual["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
+        hora_anterior = datetime.strptime(anterior["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
+        delta = hora_actual - hora_anterior
+        if delta.total_seconds() > 3 * 3600 or delta.total_seconds() < 5:
+            continue
+
+        misma_persona = actual["Reportó"] == anterior["Reportó"]
+        misma_palabra = actual["Palabra clave"] == anterior["Palabra clave"]
+        mismo_equipo = actual["Máquina"] == anterior["Máquina"]
+
+        if misma_persona or misma_palabra or mismo_equipo or not misma_persona:
+            respuestas.append((anterior, actual))
+    return respuestas
+
 # ---------------------- INTERFAZ STREAMLIT ----------------------
 st.set_page_config(page_title="Analizador de Turno", layout="wide")
 st.title("📊 Paros CVT - WhatsApp Nivel 2 y 3")
@@ -142,56 +185,6 @@ else:
 
 st.sidebar.info(f"⏳ Analizando mensajes desde **{inicio_turno.strftime('%d/%m/%Y %H:%M')}** hasta **{fin_turno.strftime('%d/%m/%Y %H:%M')}**")
 
-import difflib
-
-VARIACIONES_EN_PRODUCCION = [
-    "en producción", "en produccion", "en produción", "EN PRODUCCIÓN", "En produccion",
-    "En Producción", "EN PRODUCCION", "EN PRODUCION"
-]
-
-def contiene_frase_respuesta(texto):
-    texto = texto.lower()
-    for variante in VARIACIONES_EN_PRODUCCION:
-        if difflib.SequenceMatcher(None, texto.lower(), variante.lower()).ratio() > 0.8:
-            return True
-        if variante in texto:
-            return True
-    return False
-
-def detectar_respuestas(datos):
-    respuestas = []
-    for i in range(1, len(datos)):
-        actual = datos[i]
-        anterior = datos[i - 1]
-
-        # Mensaje corto
-        palabras = actual["Mensaje completo"].split()
-        if len(palabras) > 40:
-            continue
-
-        # Contiene frase de cierre o solución
-        if not contiene_frase_respuesta(actual["Mensaje completo"]):
-            continue
-
-        # Tiempo entre mensajes
-        hora_actual = datetime.strptime(actual["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
-        hora_anterior = datetime.strptime(anterior["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
-        delta = hora_actual - hora_anterior
-        if delta.total_seconds() > 3 * 3600 or delta.total_seconds() < 5:
-            continue
-
-        # Coincidencia remitente o palabra clave
-        misma_persona = actual["Reportó"] == anterior["Reportó"]
-        misma_palabra = actual["Palabra clave"] == anterior["Palabra clave"]
-        mismo_equipo = actual["Máquina"] == anterior["Máquina"]
-
-        if misma_persona or (misma_palabra or mismo_equipo):
-            respuestas.append((anterior, actual))
-        elif not misma_persona:
-            respuestas.append((anterior, actual))
-
-    return respuestas
-
 if archivo is not None:
     mensajes = cargar_chat_whatsapp(archivo)
 
@@ -201,50 +194,39 @@ if archivo is not None:
         mensajes_filtrados = filtrar_mensajes_en_rango(mensajes, inicio_turno, fin_turno)
         st.success(f"✅ Mensajes analizados: {len(mensajes_filtrados)} en el rango seleccionado.")
 
-...
-# El resto del código se mantiene igual hasta:
-
         datos_estructurados = []
-
         for fecha_hora, mensaje, palabra in sorted(mensajes_filtrados, key=lambda x: x[0]):
             datos = extraer_datos_estructurados(mensaje, fecha_hora)
             datos["Palabra clave"] = palabra
             datos["Mensaje completo"] = mensaje
             datos_estructurados.append(datos)
 
-        # Detectar posibles respuestas una sola vez
         respuestas = detectar_respuestas(datos_estructurados)
 
-        # Mostrar cada mensaje y sus posibles respuestas
         for datos in datos_estructurados:
-            with st.expander(f"🗕 {datos['Hora de inicio']} | 👤 {datos['Reportó']}", expanded=False):
+            with st.expander(f"📅 {datos['Hora de inicio']} | 👤 {datos['Reportó']}", expanded=False):
                 st.markdown(f"""
-                - 🏠 **Máquina:** {datos['Máquina'] or 'No detectada'}
+                - 🏭 **Máquina:** {datos['Máquina'] or 'No detectada'}
                 - ❌ **Motivo de paro:** {datos['Motivo de paro'] or 'No especificado'}
-                - 💠 **Solución:** {datos['Solución'] or 'No especificada'}
+                - 🛠 **Solución:** {datos['Solución'] or 'No especificada'}
                 - 🔑 **Palabra clave:** {datos['Palabra clave']}
-
+                
                 📩 **Mensaje original:**
                 ```
                 {datos['Mensaje completo']}
                 ```
-                ---
-                """)
+                ---""")
 
-                # Mostrar respuestas solo para este mensaje
                 respuestas_para_este = [r for o, r in respuestas if o["Mensaje completo"] == datos["Mensaje completo"]]
-
                 if respuestas_para_este:
-                    st.markdown("\n**🔗 Posibles respuestas:**")
+                    st.markdown("🔗 **Posibles respuestas:**")
                     for respuesta in respuestas_para_este:
                         st.markdown(f"""
                         <div style="border-left: 5px solid #4CAF50; padding-left: 10px; margin-bottom: 10px;">
-                        <b>↩ {respuesta['Reportó']} ({respuesta['Hora de inicio']}):</b><br>
+                        <b>↪ {respuesta['Reportó']} ({respuesta['Hora de inicio']}):</b><br>
                         <code>{respuesta['Mensaje completo']}</code>
                         </div>
                         """, unsafe_allow_html=True)
-                else:
-                    st.info("🔍 No se detectaron respuestas automáticas para este mensaje.")
 
         # Exportar a Excel
         df = pd.DataFrame(datos_estructurados)[["Máquina", "Motivo de paro", "Solución", "Hora de inicio", "Reportó"]]
@@ -253,7 +235,7 @@ if archivo is not None:
         output.seek(0)
 
         st.download_button(
-            label="📅 Descargar Excel",
+            label="📥 Descargar Excel",
             data=output,
             file_name="reporte_fallas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
