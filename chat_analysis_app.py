@@ -225,35 +225,35 @@ if archivo is not None:
         
        respuestas = detectar_respuestas(datos_estructurados)
 
-for datos in datos_estructurados:
-    with st.expander(f"📅 {datos['Hora de inicio']} | 👤 {datos['Reportó']}", expanded=False):
-        st.markdown(f"""
-        - 🏭 **Máquina:** {datos['Máquina'] or 'No detectada'}
-        - ❌ **Motivo de paro:** {datos['Motivo de paro'] or 'No especificado'}
-        - 🛠 **Solución:** {datos['Solución'] or 'No especificada'}
-        - 🔑 **Palabra clave:** {datos['Palabra clave']}
-        
-        📩 **Mensaje original:**
-        ```
-        {datos['Mensaje completo']}
-        ```
-        ---""")
+        for datos in datos_estructurados:
+            with st.expander(f"📅 {datos['Hora de inicio']} | 👤 {datos['Reportó']}", expanded=False):
+                st.markdown(f"""
+                - 🏭 **Máquina:** {datos['Máquina'] or 'No detectada'}
+                - ❌ **Motivo de paro:** {datos['Motivo de paro'] or 'No especificado'}
+                - 🛠 **Solución:** {datos['Solución'] or 'No especificada'}
+                - 🔑 **Palabra clave:** {datos['Palabra clave']}
+                
+                📩 **Mensaje original:**
+                ```
+                {datos['Mensaje completo']}
+                ```
+                ---""")
 
         # Mostrar respuestas solo para este mensaje
         respuestas_para_este = [r for o, r in respuestas if o["Mensaje completo"] == datos["Mensaje completo"]]
 
-        if respuestas_para_este:
-            st.markdown("🔗 **Posibles respuestas:**")
-            for respuesta in respuestas_para_este:
-                st.markdown(f"""
-                <div style="border-left: 5px solid #4CAF50; padding-left: 10px; margin-bottom: 10px;">
-                <b>↪ {respuesta['Reportó']} ({respuesta['Hora de inicio']}):</b><br>
-                <code>{respuesta['Mensaje completo']}</code>
-                </div>
-                """, unsafe_allow_html=True)
+            if respuestas_para_este:
+                st.markdown("🔗 **Posibles respuestas:**")
+                for respuesta in respuestas_para_este:
+                    st.markdown(f"""
+                    <div style="border-left: 5px solid #4CAF50; padding-left: 10px; margin-bottom: 10px;">
+                    <b>↪ {respuesta['Reportó']} ({respuesta['Hora de inicio']}):</b><br>
+                    <code>{respuesta['Mensaje completo']}</code>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-        else:
-            st.info("🔍 No se detectaron respuestas automáticas con los criterios definidos.")            
+            else:
+                st.info("🔍 No se detectaron respuestas automáticas con los criterios definidos.")            
 
         # Exportar a Excel
         df = pd.DataFrame(datos_estructurados)[["Máquina", "Motivo de paro", "Solución", "Hora de inicio", "Reportó"]]
