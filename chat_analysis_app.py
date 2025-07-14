@@ -139,7 +139,7 @@ def detectar_respuestas(datos):
         anterior = datos[i - 1]
 
         palabras = actual["Mensaje completo"].split()
-        if len(palabras) > 40:
+        if len(palabras) > 100:
             continue
 
         if not contiene_frase_respuesta(actual["Mensaje completo"]):
@@ -148,7 +148,7 @@ def detectar_respuestas(datos):
         hora_actual = datetime.strptime(actual["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
         hora_anterior = datetime.strptime(anterior["Hora de inicio"], "%d/%m/%Y %H:%M:%S")
         delta = hora_actual - hora_anterior
-        if delta.total_seconds() > 3 * 3600 or delta.total_seconds() < 5:
+        if delta.total_seconds() > 12 * 3600 or delta.total_seconds() < 5:
             continue
 
         misma_persona = actual["Reportó"] == anterior["Reportó"]
