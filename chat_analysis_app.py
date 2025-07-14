@@ -158,8 +158,8 @@ def detectar_respuestas(datos):
     return respuestas
 
 # ------------------ INTERFAZ ----------------------
-st.set_page_config(page_title="Analizador Paros", layout="wide")
-st.title("🧠 Análisis de chats de escalamiento (N2 y N3)")
+st.set_page_config(page_title="CVT Daily Machine Performance Analyzer", layout="wide")
+st.title("🧠 CVT Nivel 2 y 3")
 
 archivo_n2 = st.file_uploader("📤 Chat Nivel 2", type=["txt"], key="chatn2")
 archivo_n3 = st.file_uploader("📤 Chat Nivel 3", type=["txt"], key="chatn3")
