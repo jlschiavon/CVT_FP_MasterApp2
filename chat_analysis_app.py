@@ -12,8 +12,9 @@ PALABRAS_CLAVE = [
     "Recken 31", "Recken 13", "Recken 33", "Recken 34", "R19", "R24", "R17", "R20",
     "R31", "R13", "R33", "R34", "R 19", "R 24", "R 17", "R 20", "R 31", "R 13", "R 33", "R 34",
     "Recken19", "Recken24", "Recken17", "Recken20", "Recken31", "Recken13", "Recken33", "Recken34",
-    "VPK 1", "VPK 2", "VPK1", "VPK2", "Plato Vibrador", "Lavadora", "Lavadoras",
-    "Lavadora 1", "Lavadora 2", "lavadora 1", "lavadora 2", "recken", "reckens", "r19", "plato vibrador", "Plato vibrador 1", "Plato vibrador 2"
+    "VPK 1", "VPK 2", "VPK1", "VPK2", "vpk1","vpk2", "Vpk1","Vpk2", "Plato Vibrador", "Lavadora", "Lavadoras",
+    "Lavadora 1", "Lavadora 2", "lavadora 1", "lavadora 2", "recken", "reckens", "r19", "r24","r17","r20","r31","r13",
+    "r33", "r34", "plato vibrador", "Plato vibrador 1", "Plato vibrador 2", "plato", "Plato"
 ]
 
 MAQUINAS_VALIDAS = [
