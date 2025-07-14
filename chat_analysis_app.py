@@ -170,8 +170,8 @@ RUTA_LOGO = "assets/logo.png"
 RUTA_PRODUCTO = "assets/producto.jpg"
 
 # Cargar imágenes si existen
-logo_empresa = Image.open(assets/LogoSchaeffler.png) if os.path.exists(assets/LogoSchaeffler.png) else None
-imagen_producto = Image.open(assets/Cvt.jpg) if os.path.exists(assets/Cvt.jpg) else None
+logo_empresa = Image.open("assets/LogoSchaeffler.png") if os.path.exists("assets/LogoSchaeffler.png") else None
+imagen_producto = Image.open("assets/Cvt.jpg") if os.path.exists("assets/Cvt.jpg") else None
 
 # CSS para imagen superior y logo flotante
 st.markdown(
