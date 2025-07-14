@@ -158,8 +158,64 @@ def detectar_respuestas(datos):
     return respuestas
 
 # ------------------ INTERFAZ ----------------------
-st.set_page_config(page_title="CVT Daily Machine Performance Analyzer", layout="wide")
-st.title("🧠 CVT Nivel 2 y 3")
+st.set_page_config(page_title="Analizador Paros", layout="wide")
+st.title("🧠 Análisis de chats de escalamiento (N2 y N3)")
+
+# CSS para imagen de producto y logo fijo
+st.markdown(
+    """
+    <style>
+    .product-image-container img {
+        width: 100%;
+        height: 10vh;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .logo-container {
+        position: fixed;
+        top: 15px;
+        right: 25px;
+        width: 100px;
+        height: auto;
+        z-index: 1000;
+        background-color: white;
+        padding: 5px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .logo-container img {
+        width: 100%;
+        height: auto;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Cargar imágenes
+col_img, col_logo = st.columns([0.85, 0.15])
+
+with col_img:
+    imagen_producto = st.file_uploader("🖼️ Imagen del producto", type=["png", "jpg", "jpeg"], key="imagen_producto")
+
+with col_logo:
+    logo_empresa = st.file_uploader("🏢 Logo empresa", type=["png", "jpg", "jpeg"], key="logo_empresa")
+
+# Mostrar imagen del producto (horizontal superior)
+if imagen_producto is not None:
+    st.markdown('<div class="product-image-container">', unsafe_allow_html=True)
+    st.image(imagen_producto, use_column_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Mostrar logo flotante (fijo en scroll)
+if logo_empresa is not None:
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    st.image(logo_empresa)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 archivo_n2 = st.file_uploader("📤 Chat Nivel 2", type=["txt"], key="chatn2")
 archivo_n3 = st.file_uploader("📤 Chat Nivel 3", type=["txt"], key="chatn3")
