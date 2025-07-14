@@ -118,7 +118,7 @@ def extraer_datos_estructurados(mensaje, fecha_hora):
 
 # ---------------------- INTERFAZ STREAMLIT ----------------------
 st.set_page_config(page_title="Analizador de Turno", layout="wide")
-st.title("📊 Analizador de Mensajes de Turno - WhatsApp")
+st.title("📊 Paros CVT - WhatsApp Nivel 2 y 3")
 
 archivo = st.file_uploader("🔼 Sube el archivo de chat (.txt exportado de WhatsApp)", type=["txt"])
 
@@ -185,7 +185,7 @@ def detectar_respuestas(datos):
         misma_palabra = actual["Palabra clave"] == anterior["Palabra clave"]
         mismo_equipo = actual["Máquina"] == anterior["Máquina"]
 
-        if misma_persona and (misma_palabra or mismo_equipo):
+        if misma_persona or (misma_palabra or mismo_equipo):
             respuestas.append((anterior, actual))
         elif not misma_persona:
             respuestas.append((anterior, actual))
@@ -223,20 +223,35 @@ if archivo is not None:
                 ---
                 """)
         
-        respuestas = detectar_respuestas(datos_estructurados)
+       respuestas = detectar_respuestas(datos_estructurados)
 
-        if respuestas:
-            st.subheader("🔗 Posibles respuestas detectadas")
-            for original, respuesta in respuestas:
-                with st.container():
-                    st.markdown(f"""
-                    <div style="border-left: 5px solid #4CAF50; padding-left: 10px; margin-bottom: 10px;">
-                    <b>📌 Mensaje original ({original['Reportó']} - {original['Hora de inicio']}):</b><br>
-                    <code>{original['Mensaje completo']}</code><br><br>
-                    <b>↪ Posible respuesta ({respuesta['Reportó']} - {respuesta['Hora de inicio']}):</b><br>
-                    <code>{respuesta['Mensaje completo']}</code>
-                    </div>
-                    """, unsafe_allow_html=True)
+for datos in datos_estructurados:
+    with st.expander(f"📅 {datos['Hora de inicio']} | 👤 {datos['Reportó']}", expanded=False):
+        st.markdown(f"""
+        - 🏭 **Máquina:** {datos['Máquina'] or 'No detectada'}
+        - ❌ **Motivo de paro:** {datos['Motivo de paro'] or 'No especificado'}
+        - 🛠 **Solución:** {datos['Solución'] or 'No especificada'}
+        - 🔑 **Palabra clave:** {datos['Palabra clave']}
+        
+        📩 **Mensaje original:**
+        ```
+        {datos['Mensaje completo']}
+        ```
+        ---""")
+
+        # Mostrar respuestas solo para este mensaje
+        respuestas_para_este = [r for o, r in respuestas if o["Mensaje completo"] == datos["Mensaje completo"]]
+
+        if respuestas_para_este:
+            st.markdown("🔗 **Posibles respuestas:**")
+            for respuesta in respuestas_para_este:
+                st.markdown(f"""
+                <div style="border-left: 5px solid #4CAF50; padding-left: 10px; margin-bottom: 10px;">
+                <b>↪ {respuesta['Reportó']} ({respuesta['Hora de inicio']}):</b><br>
+                <code>{respuesta['Mensaje completo']}</code>
+                </div>
+                """, unsafe_allow_html=True)
+
         else:
             st.info("🔍 No se detectaron respuestas automáticas con los criterios definidos.")            
 
