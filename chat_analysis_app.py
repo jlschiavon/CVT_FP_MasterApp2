@@ -194,21 +194,21 @@ if img_base64_producto or logo_base64:
 
             .banner-superior {
                 position: fixed;
-                top: 6vh;
+                top: 20vh;
                 left: 0;
                 width: 100%;
                 height: 10vh;
                 background-size: cover;
                 background-position: center;
-                opacity: 0.4;
+                opacity: 0.7;
                 z-index: 998;
             }
 
             .logo-fijo {
                 position: fixed;
                 top: 0.5vh;
-                right: 1vw;
-                width: 8vw;
+                right: 4vw;
+                width: 10vw;
                 height: auto;
                 z-index: 999;
                 background-color: rgba(255, 255, 255, 0.8);
@@ -217,7 +217,7 @@ if img_base64_producto or logo_base64:
             }
 
             .contenido {
-                margin-top: 17vh;
+                margin-top: 25vh;
             }
         </style>
     """, unsafe_allow_html=True)
