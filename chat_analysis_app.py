@@ -157,29 +157,6 @@ def detectar_respuestas(datos):
 
     return respuestas
 
-def carga_ALDS(df):
-    df = pd.read_csv(r"C:\Users\jorge\OneDrive - Instituto Tecnologico y de Estudios Superiores de Monterrey\Desktop\streamlit_reporte_ALDS\05 - Overview (Parts worked in stations per shift).csv", skiprows=14)
-    df.dropna(how="all", axis=1, inplace=True)
-    df.dropna(how="all", axis=0, inplace=True)
-    df = df.loc[:, ~df.columns.str.contains("Unnamed")]
-    df["Station"] = df["Station"].where(df["Station"].str.startswith("Reckstation", na=False)).ffill()
-
-    partes = orden_partes
-    ALDS = []
-
-    for shift in shifts:
-        df_shift = df[df["Shift"] == shift]
-        for parte in partes:
-            if parte not in df.columns:
-                continue
-            filtro = df_shift[parte] != 0
-            total_serie = df_shift.loc[filtro, "Serie Parts"].sum() if filtro.any() else 0
-            total_rework = df_shift.loc[filtro, "Rework Parts"].sum() if filtro.any() else 0
-            ALDS.append({"Shift": shift, "Parte": parte, "ALDS Serie": total_serie, "ALDS Rework": total_rework})
-
-    df_resultados = pd.DataFrame(ALDS).set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
-
-
 # ------------------ INTERFAZ ----------------------
 from PIL import Image
 import os
@@ -265,7 +242,6 @@ if img_base64_producto or logo_base64:
     # Abrimos contenedor para desplazar contenido hacia abajo
     st.markdown('<div class="contenido">', unsafe_allow_html=True)
 
-st.markdown('<div class="titulo-principal">CUADRAJE</div>', unsafe_allow_html=True)
 
 st.set_page_config(page_title="Analizador Paros", layout="wide")
 
@@ -345,8 +321,6 @@ def procesar_chat(nombre_nivel, archivo):
         file_name=f"reporte_{nombre_nivel.lower().replace(' ', '_')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
-
 
 # ------------- PROCESAMIENTO ------------
 procesar_chat("Nivel 2", archivo_n2)
