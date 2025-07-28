@@ -265,6 +265,7 @@ if img_base64_producto or logo_base64:
     # Abrimos contenedor para desplazar contenido hacia abajo
     st.markdown('<div class="contenido">', unsafe_allow_html=True)
 
+st.markdown('<div class="titulo-principal">CUADRAJE</div>', unsafe_allow_html=True)
 
 st.set_page_config(page_title="Analizador Paros", layout="wide")
 
@@ -344,6 +345,8 @@ def procesar_chat(nombre_nivel, archivo):
         file_name=f"reporte_{nombre_nivel.lower().replace(' ', '_')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
 
 # ------------- PROCESAMIENTO ------------
 procesar_chat("Nivel 2", archivo_n2)
