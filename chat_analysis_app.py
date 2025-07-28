@@ -157,93 +157,87 @@ def detectar_respuestas(datos):
 
     return respuestas
 
+def carga_ALDS(df):
+    df = pd.read_csv(r"C:\Users\jorge\OneDrive - Instituto Tecnologico y de Estudios Superiores de Monterrey\Desktop\streamlit_reporte_ALDS\05 - Overview (Parts worked in stations per shift).csv", skiprows=14)
+    df.dropna(how="all", axis=1, inplace=True)
+    df.dropna(how="all", axis=0, inplace=True)
+    df = df.loc[:, ~df.columns.str.contains("Unnamed")]
+    df["Station"] = df["Station"].where(df["Station"].str.startswith("Reckstation", na=False)).ffill()
+
+    partes = orden_partes
+    ALDS = []
+
+    for shift in shifts:
+        df_shift = df[df["Shift"] == shift]
+        for parte in partes:
+            if parte not in df.columns:
+                continue
+            filtro = df_shift[parte] != 0
+            total_serie = df_shift.loc[filtro, "Serie Parts"].sum() if filtro.any() else 0
+            total_rework = df_shift.loc[filtro, "Rework Parts"].sum() if filtro.any() else 0
+            ALDS.append({"Shift": shift, "Parte": parte, "ALDS Serie": total_serie, "ALDS Rework": total_rework})
+
+    df_resultados = pd.DataFrame(ALDS).set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
+
 # ------------------ INTERFAZ ----------------------
-from PIL import Image
-import os
-import base64
-
-# Rutas fijas
-RUTA_LOGO = "assets/LogoSchaeffler.png"
-RUTA_PRODUCTO = "assets/producto.jpg"
-
-# Función para codificar imágenes en base64
-def obtener_base64(ruta_imagen):
-    with open(ruta_imagen, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
-# Cargar imágenes si existen
-img_base64_producto = obtener_base64(RUTA_PRODUCTO) if os.path.exists(RUTA_PRODUCTO) else None
-logo_base64 = obtener_base64(RUTA_LOGO) if os.path.exists(RUTA_LOGO) else None
-
-# HTML y estilos
-if img_base64_producto or logo_base64:
-    st.markdown("""
-        <style>
-            .titulo-principal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                text-align: center;
-                font-size: 2.2vw;
-                font-weight: bold;
-                padding: 1vh 0;
-                z-index: 1001;
-                background: rgba(255, 255, 255, 0.8);
-            }
-
-            .banner-superior {
-                position: fixed;
-                top: 20vh;
-                left: 0;
-                width: 100%;
-                height: 10vh;
-                background-size: cover;
-                background-position: center;
-                opacity: 0.7;
-                z-index: 998;
-            }
-
-            .logo-fijo {
-                position: fixed;
-                top: 0.5vh;
-                right: 4vw;
-                width: 10vw;
-                height: auto;
-                z-index: 999;
-                background-color: rgba(255, 255, 255, 0.8);
-                border-radius: 8px;
-                padding: 4px;
-            }
-
-            .contenido {
-                margin-top: 25vh;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Mostrar título
-    st.markdown('<div class="titulo-principal">CVT Machine Downtime Analyzer</div>', unsafe_allow_html=True)
-
-    # Imagen de producto como banner
-    if img_base64_producto:
-        st.markdown(
-            f'<div class="banner-superior" style="background-image: url(\'data:image/jpeg;base64,{img_base64_producto}\');"></div>',
-            unsafe_allow_html=True
-        )
-
-    # Logo de la empresa
-    if logo_base64:
-        st.markdown(
-            f'<img class="logo-fijo" src="data:image/png;base64,{logo_base64}"/>',
-            unsafe_allow_html=True
-        )
-
-    # Abrimos contenedor para desplazar contenido hacia abajo
-    st.markdown('<div class="contenido">', unsafe_allow_html=True)
-
-
 st.set_page_config(page_title="Analizador Paros", layout="wide")
+st.title("🧠 Análisis de chats de escalamiento (N2 y N3)")
+
+# CSS para imagen de producto y logo fijo
+st.markdown(
+    """
+    <style>
+    .product-image-container img {
+        width: 100%;
+        height: 10vh;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .logo-container {
+        position: fixed;
+        top: 15px;
+        right: 25px;
+        width: 100px;
+        height: auto;
+        z-index: 1000;
+        background-color: white;
+        padding: 5px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .logo-container img {
+        width: 100%;
+        height: auto;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Cargar imágenes
+col_img, col_logo = st.columns([0.85, 0.15])
+
+with col_img:
+    imagen_producto = st.file_uploader("🖼️ Imagen del producto", type=["png", "jpg", "jpeg"], key="imagen_producto")
+
+with col_logo:
+    logo_empresa = st.file_uploader("🏢 Logo empresa", type=["png", "jpg", "jpeg"], key="logo_empresa")
+
+# Mostrar imagen del producto (horizontal superior)
+if imagen_producto is not None:
+    st.markdown('<div class="product-image-container">', unsafe_allow_html=True)
+    st.image(imagen_producto, use_column_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Mostrar logo flotante (fijo en scroll)
+if logo_empresa is not None:
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    st.image(logo_empresa)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 archivo_n2 = st.file_uploader("📤 Chat Nivel 2", type=["txt"], key="chatn2")
 archivo_n3 = st.file_uploader("📤 Chat Nivel 3", type=["txt"], key="chatn3")
@@ -325,5 +319,3 @@ def procesar_chat(nombre_nivel, archivo):
 # ------------- PROCESAMIENTO ------------
 procesar_chat("Nivel 2", archivo_n2)
 procesar_chat("Nivel 3", archivo_n3)
-
-st.markdown('</div>', unsafe_allow_html=True)
