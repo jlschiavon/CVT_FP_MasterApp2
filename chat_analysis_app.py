@@ -8,13 +8,14 @@ st.markdown("""
     <style>
         /* Fondo general */
         .main {
-            background-color: #D9D9D9; /* gris claro */
+            background-color: #650000; /* gris claro */
         }
 
         /* Panel lateral */
         section[data-testid="stSidebar"] {
             background-color: #626262; /* gris oscuro */
             padding: 20px;
+            border-radius: 20px
         }
         
         /* Botones personalizados */
