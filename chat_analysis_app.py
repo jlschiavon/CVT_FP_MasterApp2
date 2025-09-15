@@ -13,7 +13,7 @@ st.markdown("""
 
         /* Panel lateral */
         section[data-testid="stSidebar"] {
-            background-color: #626262; /* gris oscuro */
+            background-color: #650000; /* gris oscuro */
             padding: 20px;
         }
         
