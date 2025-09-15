@@ -3,38 +3,38 @@ import streamlit as st
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
 
-# Estilos CSS
+# CSS
 st.markdown("""
     <style>
-        /* Fondo de la página central */
+        /* Fondo del área central */
         div[data-testid="stAppViewContainer"] {
             background-color: #626262;
         }
 
-        /* Panel lateral */
+        /* Fondo del sidebar */
         section[data-testid="stSidebar"] {
             background-color: #D9D9D9;
             padding: 10px;
             border-radius: 20px;
         }
 
-        /* Caja central */
-        .central-box {
-            background-color: #D9D9D9;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-        
         /* Caja del menú lateral */
-        .sidebar-box {
+        div[data-testid="sidebar-box"] {
             background-color: #626262;
             padding: 15px;
             border-radius: 12px;
             margin-top: 20px;
         }
 
-        /* Rectángulo superior */
+        /* Caja central */
+        div[data-testid="central-box"] {
+            background-color: #D9D9D9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        /* Banner superior */
         .top-banner {
             background-color: #2F852C;
             color: white;
@@ -45,7 +45,7 @@ st.markdown("""
             font-weight: bold;
             margin-bottom: 10px;
         }
-        
+
         /* Botones */
         .stButton>button {
             display: block;
@@ -67,35 +67,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Menú lateral
+# Menú lateral con caja
 st.sidebar.title("Menu")
 
-# Caja de color en el sidebar
 with st.sidebar:
-    st.markdown('<div class="sidebar-box">', unsafe_allow_html=True)
-    box_container = st.container()  # Contenedor para los botones
-    with box_container:
-        if st.button("OEE"):
+    with st.container():
+        st.markdown('<div data-testid="sidebar-box">', unsafe_allow_html=True)
+
+        if st.button("OEE", key="oee"):
             st.session_state.section = "OEE"
-        if st.button("Producción"):
+        if st.button("Producción", key="prod"):
             st.session_state.section = "Production"
-        if st.button("Scrap"):
+        if st.button("Scrap", key="scrap"):
             st.session_state.section = "Scrap"
-        if st.button("Paros de máquina"):
+        if st.button("Paros de máquina", key="paros"):
             st.session_state.section = "Machine Breakdowns"
-        if st.button("Aceite ATF"):
+        if st.button("Aceite ATF", key="oil"):
             st.session_state.section = "Oil Tracking"
-        if st.button("Negativo"):
+        if st.button("Negativo", key="neg"):
             st.session_state.section = "Negative"
-    st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # Banner superior
-banner_text = "CVT Final Processes"
-st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='top-banner'>CVT Final Processes</div>", unsafe_allow_html=True)
 
-# Caja central de color
+# Caja central
 with st.container():
-    st.markdown('<div class="central-box">', unsafe_allow_html=True)
+    st.markdown('<div data-testid="central-box">', unsafe_allow_html=True)
     st.write("Aquí va el contenido principal...")
     st.markdown('</div>', unsafe_allow_html=True)
