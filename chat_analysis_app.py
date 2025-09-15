@@ -62,6 +62,9 @@ sections = {
 if "section" not in st.session_state:
     st.session_state.section = "Principal"
 
+# Input para definir el texto del banner
+banner_text = st.text_input("Escribe el texto del banner:", "CVT Final Processes - Dashboard")
+
 # Renderizamos botones
 for sec in sections.keys():
     if st.sidebar.button(sec):
