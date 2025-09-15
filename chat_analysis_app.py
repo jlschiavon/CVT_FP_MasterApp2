@@ -17,6 +17,13 @@ st.markdown("""
             padding: 20px;
             border-radius: 20px
         }
+
+        .sidebar-box {
+            background-color: #444444; /* gris un poco más claro para contraste */
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
         
         /* Botones personalizados */
         .stButton>button {
@@ -52,22 +59,27 @@ st.markdown("""
 # Menú lateral
 
 st.sidebar.title("Menu")
-st.markdown(f"<div class = 'stSidebar'>{top-banner}</div>", unsafe_allow_html = True)
+# Caja interna con color
+with st.sidebar:
+    st.markdown('<div class="sidebar-box">', unsafe_allow_html=True)
 
-# Diccionario de secciones
-sections = {
-    "Principal": "Página Principal",
-    "OEE": "🔹 Aquí se mostrarán los indicadores de OEE",
-    "Production": "📦 Producción por turno y día",
-    "Scrap": "❌ Registro de Scrap",
-    "Machine Breakdowns": "⚙️ Paros de máquina",
-    "Oil Tracking": "🛢️ Seguimiento de aceite",
-    "Negative": "📉 Datos negativos o pérdidas"
-}
+    if st.button("OEE"):
+        st.session_state.section = "OEE"
+    if st.button("Producción"):
+        st.session_state.section = "Production"
+    if st.button("Scrap"):
+        st.session_state.section = "Scrap"
+    if st.button("Paros de máquina"):
+        st.session_state.section = "Machine Breakdowns"
+    if st.button("Aceite ATF"):
+        st.session_state.section = "Oil Tracking"
+    if st.button("Negativo"):
+        st.session_state.section = "Negative"
 
-# Variable para almacenar sección activa
-if "section" not in st.session_state:
-    st.session_state.section = "Principal"
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Contenido principal
+st.title("Panel central")
 
 # Input para definir el texto del banner
 banner_text = "CVT Final Processes"
