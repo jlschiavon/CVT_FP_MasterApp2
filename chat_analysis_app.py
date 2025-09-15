@@ -71,21 +71,20 @@ st.markdown("""
 st.sidebar.title("Menu")
 
 with st.sidebar:
-    with st.container():
-        st.markdown('<div data-testid="sidebar-box">', unsafe_allow_html=True)
+    st.markdown('<div data-testid="sidebar-box">', unsafe_allow_html=True)
 
-        if st.button("OEE", key="oee"):
-            st.session_state.section = "OEE"
-        if st.button("Producción", key="prod"):
-            st.session_state.section = "Production"
-        if st.button("Scrap", key="scrap"):
-            st.session_state.section = "Scrap"
-        if st.button("Paros de máquina", key="paros"):
-            st.session_state.section = "Machine Breakdowns"
-        if st.button("Aceite ATF", key="oil"):
-            st.session_state.section = "Oil Tracking"
-        if st.button("Negativo", key="neg"):
-            st.session_state.section = "Negative"
+    if st.button("OEE", key="oee"):
+        st.session_state.section = "OEE"
+    if st.button("Producción", key="prod"):
+        st.session_state.section = "Production"
+    if st.button("Scrap", key="scrap"):
+        st.session_state.section = "Scrap"
+    if st.button("Paros de máquina", key="paros"):
+        st.session_state.section = "Machine Breakdowns"
+    if st.button("Aceite ATF", key="oil"):
+        st.session_state.section = "Oil Tracking"
+    if st.button("Negativo", key="neg"):
+        st.session_state.section = "Negative"
 
         st.markdown('</div>', unsafe_allow_html=True)
 
