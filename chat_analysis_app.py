@@ -78,18 +78,6 @@ with st.sidebar:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Contenido principal
-st.title("Panel central")
-
 # Input para definir el texto del banner
 banner_text = "CVT Final Processes"
 st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
-
-# Renderizamos botones
-for sec in sections.keys():
-    if st.sidebar.button(sec):
-        st.session_state.section = sec
-
-# Contenido dinámico según sección activa
-st.markdown(f"## {st.session_state.section}")
-st.write(sections[st.session_state.section])
