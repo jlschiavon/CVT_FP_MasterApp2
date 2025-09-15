@@ -68,8 +68,7 @@ for sec in sections.keys():
         st.session_state.section = sec
 
 # Rectángulo superior (editable por ti)
-banner_text = st.text_input("CVT Final Processes")
-st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
+banner_text = st.text_input("Escribe el texto del banner:", "CVT Final Processes - Dashboard")
 
 
 # Contenido dinámico según sección activa
