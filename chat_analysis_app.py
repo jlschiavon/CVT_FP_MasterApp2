@@ -15,7 +15,7 @@ st.markdown("""
         /* Botones personalizados */
         .stButton>button {
             width: 100%;
-            background-color: #3DAE2B;
+            background-color: #2F852C;
             color: white;
             border: none;
             border-radius: 25px;
@@ -32,11 +32,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Menú lateral
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/3/3a/Schaeffler_logo.svg", width=200)
+
 st.sidebar.title("Menu")
 
 # Diccionario de secciones
 sections = {
+    "Principal": "Página Principal",
     "OEE": "🔹 Aquí se mostrarán los indicadores de OEE",
     "Production": "📦 Producción por turno y día",
     "Scrap": "❌ Registro de Scrap",
@@ -47,7 +48,7 @@ sections = {
 
 # Variable para almacenar sección activa
 if "section" not in st.session_state:
-    st.session_state.section = "OEE"
+    st.session_state.section = "Principal"
 
 # Renderizamos botones
 for sec in sections.keys():
