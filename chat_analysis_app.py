@@ -68,7 +68,7 @@ if "section" not in st.session_state:
     st.session_state.section = "Principal"
 
 # Input para definir el texto del banner
-banner_text = st.text_input("", "CVT Final Processes")
+banner_text = "CVT Final Processes"
 st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
 
 # Renderizamos botones
