@@ -20,7 +20,7 @@ st.markdown("""
         
         /* Botones personalizados */
         .stButton>button {
-            width: 100%;
+            width: 100% !important;
             background-color: #2F852C;
             color: white;
             border: none;
