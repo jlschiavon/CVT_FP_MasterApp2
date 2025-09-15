@@ -29,6 +29,17 @@ st.markdown("""
             background-color: #2d8c20;
         }
 
+        /* Rectángulo superior */
+        .top-banner {
+            background-color: #2F852C;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
