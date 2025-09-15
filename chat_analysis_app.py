@@ -44,11 +44,11 @@ st.markdown("""
             background-color: #3DAE2B;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 12px;
-            font-size: 16px;
+            border-radius: 15px;
+            padding: 6px;
+            font-size: 12px;
             font-weight: bold;
-            margin-bottom: 12px;
+            margin-bottom: 5px;
             cursor: pointer;
         }
         .stButton>button:hover {
