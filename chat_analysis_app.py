@@ -8,7 +8,7 @@ st.markdown("""
     <style>
         /* Panel lateral */
         .sidebar .sidebar-content {
-            background-color: #f0f0f0;
+            background-color: #626262;
             padding: 20px;
             border-radius: 15px;
         }
