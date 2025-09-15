@@ -16,6 +16,7 @@ st.markdown("""
             background-color: #626262; /* gris oscuro */
             padding: 10px;
             border-radius: 20px
+            text-align: center
         }
 
         .sidebar-box {
