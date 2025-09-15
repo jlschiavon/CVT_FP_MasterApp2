@@ -8,34 +8,41 @@ st.markdown("""
     <style>
         /* Fondo de la página (central) */
         div[data-testid="stAppViewContainer"] {
-            background-color: #F5F5F5; /* gris claro */
+            background-color: #626262; /* gris claro */
         }
 
         /* Panel lateral */
         section[data-testid="stSidebar"] {
-            background-color: #626262; /* gris oscuro */
+            background-color: #D9D9D9; /* gris oscuro */
             padding: 10px;
             border-radius: 20px
             text-align: center
         }
 
+        .central-box {
+        background-color: #D9D9D9; /* gris un poco más claro para contraste */
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 20px;
+        }
+        
         .sidebar-box {
-            background-color: #444444; /* gris un poco más claro para contraste */
+            background-color: #626262; /* gris un poco más claro para contraste */
             padding: 15px;
             border-radius: 12px;
             margin-top: 20px;
         }
 
-                /* Rectángulo superior */
+        /* Rectángulo superior */
         .top-banner {
             background-color: #2F852C;
             color: white;
-            padding: 15px;
+            padding: 5px;
             border-radius: 10px;
             text-align: left;
             font-size: 20px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         
         /* Botones */
