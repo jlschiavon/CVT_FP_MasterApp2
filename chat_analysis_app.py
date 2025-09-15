@@ -52,6 +52,7 @@ st.markdown("""
 # Menú lateral
 
 st.sidebar.title("Menu")
+st.markdown(f"<div class = 'stSidebar'>{top-banner}</div>", unsafe_allow_html = True)
 
 # Diccionario de secciones
 sections = {
