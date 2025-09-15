@@ -6,36 +6,35 @@ st.set_page_config(page_title="CVT Final Processes", layout="wide")
 # Estilos CSS
 st.markdown("""
     <style>
-        /* Fondo de la página */
+        /* Fondo de la página central */
         div[data-testid="stAppViewContainer"] {
-            background-color: #626262; /* gris */
+            background-color: #626262;
         }
 
         /* Panel lateral */
         section[data-testid="stSidebar"] {
-            background-color: #D9D9D9; 
+            background-color: #D9D9D9;
             padding: 10px;
             border-radius: 20px;
-            text-align: center;
         }
 
-        /* Caja interna en el panel central */
+        /* Caja central */
         .central-box {
-            background-color: #D9D9D9; 
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 10px;
+            background-color: #D9D9D9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
         }
         
-        /* Caja interna en el sidebar */
+        /* Caja del menú lateral */
         .sidebar-box {
-            background-color: #626262; 
+            background-color: #626262;
             padding: 15px;
             border-radius: 12px;
             margin-top: 20px;
         }
 
-        /* Rectángulo superior (banner) */
+        /* Rectángulo superior */
         .top-banner {
             background-color: #2F852C;
             color: white;
@@ -67,32 +66,36 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Menú lateral con caja
-st.sidebar.title("Menú")
-with st.sidebar.container():
+
+# Menú lateral
+st.sidebar.title("Menu")
+
+# Caja de color en el sidebar
+with st.sidebar:
     st.markdown('<div class="sidebar-box">', unsafe_allow_html=True)
-
-    if st.button("OEE", key="btn1"):
-        st.session_state.section = "OEE"
-    if st.button("Producción", key="btn2"):
-        st.session_state.section = "Production"
-    if st.button("Scrap", key="btn3"):
-        st.session_state.section = "Scrap"
-    if st.button("Paros de máquina", key="btn4"):
-        st.session_state.section = "Machine Breakdowns"
-    if st.button("Aceite ATF", key="btn5"):
-        st.session_state.section = "Oil Tracking"
-    if st.button("Negativo", key="btn6"):
-        st.session_state.section = "Negative"
-
+    box_container = st.container()  # Contenedor para los botones
+    with box_container:
+        if st.button("OEE"):
+            st.session_state.section = "OEE"
+        if st.button("Producción"):
+            st.session_state.section = "Production"
+        if st.button("Scrap"):
+            st.session_state.section = "Scrap"
+        if st.button("Paros de máquina"):
+            st.session_state.section = "Machine Breakdowns"
+        if st.button("Aceite ATF"):
+            st.session_state.section = "Oil Tracking"
+        if st.button("Negativo"):
+            st.session_state.section = "Negative"
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # Banner superior
 banner_text = "CVT Final Processes"
 st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
 
-# Caja en el panel central
+# Caja central de color
 with st.container():
     st.markdown('<div class="central-box">', unsafe_allow_html=True)
-    st.write("📊 Aquí va el contenido dinámico del panel central.")
+    st.write("Aquí va el contenido principal...")
     st.markdown('</div>', unsafe_allow_html=True)
