@@ -6,9 +6,9 @@ st.set_page_config(page_title="CVT Final Processes", layout="wide")
 # Estilos CSS para personalizar la UI
 st.markdown("""
     <style>
-        /* Fondo general */
-        .main {
-            background-color: #650000; /* gris claro */
+        /* Fondo de la página (central) */
+        div[data-testid="stAppViewContainer"] {
+            background-color: #F5F5F5; /* gris claro */
         }
 
         /* Panel lateral */
