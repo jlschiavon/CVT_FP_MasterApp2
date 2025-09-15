@@ -24,25 +24,8 @@ st.markdown("""
             border-radius: 12px;
             margin-top: 20px;
         }
-        
-        /* Botones personalizados */
-        .stButton>button {
-            width: 100% !important;
-            background-color: #2F852C;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 7px;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 7px;
-            cursor: pointer;
-        }
-        .stButton>button:hover {
-            background-color: #2d8c20;
-        }
 
-        /* Rectángulo superior */
+                /* Rectángulo superior */
         .top-banner {
             background-color: #2F852C;
             color: white;
@@ -53,6 +36,25 @@ st.markdown("""
             font-weight: bold;
             margin-bottom: 20px;
         }
+        
+        /* Botones */
+        .stButton>button {
+            display: block;
+            width: 100% !important;
+            background-color: #3DAE2B;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        .stButton>button:hover {
+            background-color: #2d8c20;
+        }
+
     </style>
 """, unsafe_allow_html=True)
 
