@@ -8,12 +8,12 @@ st.markdown("""
     <style>
         /* Fondo general */
         .main {
-            background-color: #F5F5F5; /* gris claro */
+            background-color: #D9D9D9; /* gris claro */
         }
 
         /* Panel lateral */
         section[data-testid="stSidebar"] {
-            background-color: #3c3c3c; /* gris oscuro */
+            background-color: #626262; /* gris oscuro */
             padding: 20px;
         }
         
@@ -68,7 +68,7 @@ if "section" not in st.session_state:
     st.session_state.section = "Principal"
 
 # Input para definir el texto del banner
-banner_text = st.text_input("", "CVT Final Processes - Dashboard")
+banner_text = st.text_input("", "CVT Final Processes")
 st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
 
 # Renderizamos botones
