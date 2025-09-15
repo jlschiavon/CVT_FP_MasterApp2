@@ -247,17 +247,6 @@ st.markdown("""
             background-color: #2d8c20;
         }
 
-        /* Rectángulo superior */
-        .top-banner {
-            background-color: #2F852C;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -284,10 +273,6 @@ if "section" not in st.session_state:
 for sec in sections.keys():
     if st.sidebar.button(sec):
         st.session_state.section = sec
-
-# Rectángulo superior (editable por ti)
-banner_text = st.text_input("CVT Final Processes")
-st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
 
 # Contenido dinámico según sección activa
 st.markdown(f"## {st.session_state.section}")
