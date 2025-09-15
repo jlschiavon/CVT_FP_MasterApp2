@@ -14,7 +14,7 @@ st.markdown("""
         /* Panel lateral */
         section[data-testid="stSidebar"] {
             background-color: #626262; /* gris oscuro */
-            padding: 50px;
+            padding: 10px;
             border-radius: 20px
         }
 
@@ -41,7 +41,7 @@ st.markdown("""
         .stButton>button {
             display: block;
             width: 100% !important;
-            background-color: #3DAE2B;
+            background-color: #2F852C;
             color: white;
             border: none;
             border-radius: 15px;
