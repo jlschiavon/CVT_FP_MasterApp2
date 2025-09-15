@@ -6,12 +6,17 @@ st.set_page_config(page_title="CVT Final Processes", layout="wide")
 # Estilos CSS para personalizar la UI
 st.markdown("""
     <style>
-        /* Panel lateral */
-        .sidebar .sidebar-content {
-            background-color: #626262;
-            padding: 20px;
-            border-radius: 15px;
+        /* Fondo general */
+        .main {
+            background-color: #F5F5F5; /* gris claro */
         }
+
+        /* Panel lateral */
+        section[data-testid="stSidebar"] {
+            background-color: #3c3c3c; /* gris oscuro */
+            padding: 20px;
+        }
+        
         /* Botones personalizados */
         .stButton>button {
             width: 100%;
@@ -64,6 +69,7 @@ if "section" not in st.session_state:
 
 # Input para definir el texto del banner
 banner_text = st.text_input("", "CVT Final Processes - Dashboard")
+st.markdown(f"<div class='top-banner'>{banner_text}</div>", unsafe_allow_html=True)
 
 # Renderizamos botones
 for sec in sections.keys():
