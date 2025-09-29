@@ -34,6 +34,7 @@ st.markdown("""
             padding: 20px;
             border-radius: 12px;
             margin-top: 20px;
+            text-align: center;
         }
 
         /* Banner superior */
