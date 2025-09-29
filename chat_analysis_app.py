@@ -50,8 +50,8 @@ st.markdown("""
         /* Botones */
         .stButton>button {
             display: block;
-            width: 80% !important;
-            margin: 0 auto;
+            width: 100% !important;
+            margin: 2 auto;
             background-color: #2F852C;
             color: white;
             border: none;
