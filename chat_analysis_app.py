@@ -100,6 +100,6 @@ st.markdown(f"<div class='top-banner'>CVT Final Processes</div>", unsafe_allow_h
 
 # Caja central
 with st.container():
-    st.markdown('<div data-testid="central-box">', unsafe_allow_html=True)
+    
     st.write("Aquí va el contenido principal...")
     st.markdown('</div>', unsafe_allow_html=True)
