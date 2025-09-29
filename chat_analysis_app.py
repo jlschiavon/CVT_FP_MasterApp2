@@ -16,6 +16,7 @@ st.markdown("""
             background-color: #D9D9D9;
             padding: 10px;
             border-radius: 20px;
+            text-align: center;
         }
 
         /* Caja del menú lateral */
@@ -24,6 +25,7 @@ st.markdown("""
             padding: 15px;
             border-radius: 12px;
             margin-top: 20px;
+            text-align: center;
         }
 
         /* Caja central */
