@@ -77,7 +77,6 @@ st.markdown("""
 st.sidebar.title("Menu")
 
 with st.sidebar:
-    st.markdown('<div data-testid="sidebar-box">', unsafe_allow_html=True)
 
     if st.button("OEE", key="oee"):
         st.session_state.section = "OEE"
