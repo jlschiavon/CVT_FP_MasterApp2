@@ -64,6 +64,7 @@ st.markdown("""
             font-weight: bold;
             margin-bottom: 5px;
             cursor: pointer;
+            text-align: center;
         }
         .stButton>button:hover {
             background-color: #2d8c20;
