@@ -46,10 +46,24 @@ st.markdown("""
             margin-bottom: 10px;
         }
 
+        st.markdown("""
+    <style>
+        ...
+
+        /* Caja del menú lateral */
+        div[data-testid="sidebar-box"] {
+            background-color: #626262;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center; /* 👈 NUEVO */
+        }
+
         /* Botones */
         .stButton>button {
             display: block;
-            width: 100% !important;
+            width: 80% !important;  /* 👈 Cambiado de 100% a 80% */
+            margin: 0 auto;         /* 👈 Centrado horizontal */
             background-color: #2F852C;
             color: white;
             border: none;
@@ -60,6 +74,12 @@ st.markdown("""
             margin-bottom: 5px;
             cursor: pointer;
         }
+        .stButton>button:hover {
+            background-color: #2d8c20;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
         .stButton>button:hover {
             background-color: #2d8c20;
         }
