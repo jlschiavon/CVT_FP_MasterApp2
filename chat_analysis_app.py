@@ -44,12 +44,14 @@ st.markdown("""
             font-size: 35px;
             font-weight: bold;
             margin-bottom: 10px;
+            text-align: center;
         }
 
         /* Botones */
         .stButton>button {
             display: block;
-            width: 100% !important;
+            width: 800% !important;
+            margin: 0 auto;
             background-color: #2F852C;
             color: white;
             border: none;
