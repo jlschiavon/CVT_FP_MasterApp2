@@ -147,12 +147,3 @@ for machine in df_filtered["Machine"].unique():
             st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
             st.dataframe(df_filtered[df_filtered["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
-# --- Secciones genéricas ---
-elif st.session_state.section in expected_files:
-    st.header(f"📊 Sección: {st.session_state.section}")
-
-    # Mostrar el primer archivo cargado completo
-    for kw in expected_files[st.session_state.section]["keywords"]:
-        if kw in st.session_state.files:
-            st.dataframe(st.session_state.files[kw])
-            break
