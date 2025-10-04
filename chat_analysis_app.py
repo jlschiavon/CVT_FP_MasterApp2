@@ -3,7 +3,6 @@ import pandas as pd
 import io
 import re
 import numpy as np
-import seaborn as sns
 
 
 # Configuración de la página
