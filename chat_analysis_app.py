@@ -96,7 +96,7 @@ elif st.session_state.section == "OEE":
         df["YYYY"] = date_split[0]
         df["MM"] = date_split[1]
         df["DD"] = date_split[2]
-        df.drop(["Date","Unplanned"], axis=1, inplace=True)
+        df.drop(["Date","Unplanned","YYYY","MM"], axis=1, inplace=True)
 
         # 3. Filtrar solo "Daily"
         df = df[df["Shift"] == "Daily"]
@@ -114,6 +114,7 @@ elif st.session_state.section == "OEE":
         # Mostrar todos los DataFrames de cada máquina con scroll
         for machine in df["Machine"].unique():
             st.subheader(f"{machine}")
+            st.dataframe(df, column_config={"Machine": None})
             st.dataframe(df[df["Machine"] == machine])
 
 # --- Secciones genéricas ---
