@@ -84,3 +84,46 @@ elif section in expected_files:
             break
     else:
         st.warning("No se han cargado archivos para esta sección aún.")
+
+elif section == "OEE":
+    st.header("📊 Sección: OEE (Procesamiento de SQLReport)")
+
+    # Buscar archivo con keyword SQLReport
+    sql_file = None
+    for key in st.session_state.files:
+        if "sqlreport" in key.lower():
+            sql_file = st.session_state.files[key]
+            break
+
+    if sql_file is None:
+        st.warning("⚠ No se ha cargado el archivo correspondiente a SQLReport aún.")
+    else:
+        df = sql_file.copy()
+
+        # 1. Añadir 3 columnas vacías después de "Date"
+        date_col_index = df.columns.get_loc("Date") + 1
+        df.insert(date_col_index, "YYYY", "")
+        df.insert(date_col_index + 1, "MM", "")
+        df.insert(date_col_index + 2, "DD", "")
+
+        # 2. Dividir la columna Date usando "-" en YYYY, MM, DD
+        date_split = df["Date"].astype(str).str.split("-", expand=True)
+        df["YYYY"] = date_split[0]
+        df["MM"] = date_split[1]
+        df["DD"] = date_split[2]
+
+        # 3. Filtrar solo "Daily" en Shift
+        df = df[df["Shift"].str.lower() == "Daily"]
+
+        # 4. Reemplazar nombres en Machine
+        machine_map = {
+            "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
+            "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
+            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+            "12525645 | Estación de inspección 100% (1)": "VPK 1",
+            "12710703 | Estación de inspección 100% (2)": "VPK 2"
+        }
+        df["Machine"] = df["Machine"].replace(machine_map)
+
+        # Mostrar tabla final
+        st.dataframe(df)
