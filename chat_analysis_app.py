@@ -99,44 +99,37 @@ elif st.session_state.section == "OEE":
         df["DD"] = date_split[2]
         df.drop(["Date","Unplanned"], axis=1, inplace=True)
         # Convertir columna DD, MM, YYYY a tipo entero para comparación
-        # Convertir columnas a enteros de forma segura
-        df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
-        df["MM"] = pd.to_numeric(df["MM"], errors="coerce")
-        df["YYYY"] = pd.to_numeric(df["YYYY"], errors="coerce")
         
-        # Opcional: eliminar filas donde DD, MM o YYYY sean NaN
-        df = df.dropna(subset=["DD", "MM", "YYYY"])
-        
-        # Convertir a int después de limpiar NaN
-        df["DD"] = df["DD"].astype(int)
-        df["MM"] = df["MM"].astype(int)
-        df["YYYY"] = df["YYYY"].astype(int)
+# Convertir columnas a enteros de forma segura
+df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
+df["MM"] = pd.to_numeric(df["MM"], errors="coerce")
+df["YYYY"] = pd.to_numeric(df["YYYY"], errors="coerce")
+df = df.dropna(subset=["DD", "MM", "YYYY"])
+df["DD"] = df["DD"].astype(int)
+df["MM"] = df["MM"].astype(int)
+df["YYYY"] = df["YYYY"].astype(int)
 
-        # --- Selector de fecha ---
-        selected_date = st.date_input(
-            "Seleccione la fecha para mostrar OEE",
-            value=pd.to_datetime("today")
-        )
+# --- Selector de fecha ---
+selected_date = st.date_input(
+    "Seleccione la fecha para mostrar OEE (opcional)",
+    value=None  # No seleccionar fecha por defecto
+)
 
-        # Extraer día, mes, año de la fecha seleccionada
-        day = selected_date.day
-        month = selected_date.month
-        year = selected_date.year
-        
-        # --- Filtrado ---
-        # Si el usuario no toca el selector (fecha hoy) se mantiene Daily
-        # Si selecciona otra fecha, filtramos todas las filas de esa fecha independientemente del Shift
-        if selected_date == pd.to_datetime("today"):
-            df_filtered = df[df["Shift"] == "Daily"]
-        else:
-            df_filtered = df[
-                (df["DD"] == day) &
-                (df["MM"] == month) &
-                (df["YYYY"] == year)
-            ]
+# --- Filtrado según selección ---
+if selected_date:
+    # Si el usuario selecciona fecha: mostrar todas las filas de esa fecha, sin filtro Daily
+    day = selected_date.day
+    month = selected_date.month
+    year = selected_date.year
+    df_filtered = df[
+        (df["DD"] == day) &
+        (df["MM"] == month) &
+        (df["YYYY"] == year)
+    ]
+else:
+    # Si no selecciona fecha: mostrar toda la tabla tal como estaba
+    df_filtered = df.copy()  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
 
-        # 3. Filtrar solo "Daily"
-        df = df[df["Shift"] == "Daily"]
 
         # 4. Reemplazar nombres de Machine
         machine_map = {
@@ -152,6 +145,11 @@ elif st.session_state.section == "OEE":
         for machine in df["Machine"].unique():
             st.subheader(f"{machine} - Fecha: {day:02d}/{month:02d}/{year}")
             st.dataframe(df[df["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
+
+        # --- Mostrar tabla por máquina ---
+        for machine in df_filtered["Machine"].unique():
+            st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
+            st.dataframe(df_filtered[df_filtered["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
 # --- Secciones genéricas ---
 elif st.session_state.section in expected_files:
