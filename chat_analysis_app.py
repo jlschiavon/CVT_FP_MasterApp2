@@ -89,38 +89,50 @@ elif section == "OEE":
     st.header("📊 Sección: OEE (Procesamiento de SQLReport)")
 
     # Buscar archivo con keyword SQLReport
-    sql_file = next((df for key, df in st.session_state.files.items() if "sqlreport" in key.lower()), None)
+    sql_file = None
+    for key in st.session_state.files:
+        if "sqlreport" in key.lower():
+            sql_file = st.session_state.files[key]
+            break
 
     if sql_file is None:
         st.warning("⚠ No se ha cargado el archivo correspondiente a SQLReport aún.")
     else:
         df = sql_file.copy()
 
-        # 1. Añadir columnas YYYY, MM, DD después de "Date"
+        # 1. Añadir 3 columnas vacías después de "Date"
         date_col_index = df.columns.get_loc("Date") + 1
-        for col in ["YYYY", "MM", "DD"]:
-            df.insert(date_col_index, col, "")
-            date_col_index += 1
+        df.insert(date_col_index, "YYYY", "")
+        df.insert(date_col_index + 1, "MM", "")
+        df.insert(date_col_index + 2, "DD", "")
 
-        # 2. Extraer Año, Mes, Día desde la columna Date
+        # 2. Dividir la columna Date usando "-" en YYYY, MM, DD
         date_split = df["Date"].astype(str).str.split("-", expand=True)
-        if date_split.shape[1] == 3:  # Solo si tiene el formato correcto
-            df["YYYY"], df["MM"], df["DD"] = date_split[0], date_split[1], date_split[2]
+        df["YYYY"] = date_split[0]
+        df["MM"] = date_split[1]
+        df["DD"] = date_split[2]
 
-        # 3. Limpiar columna Shift y filtrar solo "Daily"
-        df["Shift"] = df["Shift"].astype(str).str.strip().str.lower()  # Limpia espacios y baja todo a minúsculas
-        df = df[df["Shift"] == "daily"]
+        # 3. Filtrar solo filas con Shift "Daily" (limpiando espacios y upper/lower)
+        df = df[df["Shift"].astype(str).str.strip().str.lower() == "daily"]
 
-        # 4. Reemplazar nombres de Machine con coincidencia parcial
-        machine_map = {
+        # 4. Reemplazar nombres en Machine con coincidencias parciales
+        replacements = {
             "7050": "Recken 7050 (JATCO)",
             "7150": "Recken 7150 (HYUNDAI)",
             "7250": "Recken 7250 (GM)",
-            "14645": "VPK 1",
-            "10703": "VPK 2"
+            "estación de inspección 100% (1)": "VPK 1",
+            "estación de inspección 100% (2)": "VPK 2"
         }
-        for key, new_name in machine_map.items():
-            df["Machine"] = df["Machine"].astype(str).str.replace(key, new_name, regex=False)
 
-        # Mostrar tabla final
-        st.dataframe(df)
+        def replace_machine(value):
+            val = value.lower()
+            for key, new_name in replacements.items():
+                if key in val:  # coincidencia parcial
+                    return new_name
+            return value  # si no coincide lo dejamos igual
+
+        df["Machine"] = df["Machine"].astype(str).apply(replace_machine)
+
+        # Mostrar tabla final procesada
+        st.subheader("✅ Tabla después de aplicar filtros y reemplazos:")
+        st.dataframe(df, use_container_width=True)
