@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import io
 import re
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 # Configuración de la página
@@ -92,102 +95,55 @@ elif section in expected_files:
 elif section == "OEE":
     st.header("📊 Sección: OEE (Procesamiento de SQLReport)")
 
-    # 1) Buscar el archivo SQLReport de forma flexible: por nombre o por contenido (columnas)
-    sql_df = None
-    sql_key = None
-
-    # Primero intenta por nombre de clave/file name que contenga 'sqlreport'
-    for key, val in st.session_state.files.items():
-        try:
-            name = str(key)
-        except:
-            name = ""
-        if "sqlreport" in name.lower():
-            sql_df = val.copy()
-            sql_key = key
+    # Buscar archivo con keyword SQLReport
+    sql_file = None
+    for key in st.session_state.files:
+        if "sqlreport" in key.lower():
+            sql_file = st.session_state.files[key]
             break
 
-    # Si no lo encontramos por nombre, buscamos un dataframe que tenga columnas 'date' y 'machine'
-    if sql_df is None:
-        for key, val in st.session_state.files.items():
-            df_try = val.copy()
-            cols_norm = [str(c).strip().lower() for c in df_try.columns]
-            if any("machine" in c for c in cols_norm) and any("date" in c for c in cols_norm):
-                sql_df = df_try.copy()
-                sql_key = key
-                break
-
-    if sql_df is None:
-        st.warning("No se encontró un archivo SQLReport. Sube el archivo (xls/xlsx/csv/txt) o verifica el nombre.")
+    if sql_file is None:
+        st.warning("⚠ No se ha cargado el archivo correspondiente a SQLReport aún.")
     else:
-        df = sql_df.copy()
+        df = sql_file.copy()
 
-        # util: encontrar columna por token parcial (case-insensitive)
-        def find_col(df, token):
-            token = token.lower()
-            for col in df.columns:
-                if token in str(col).strip().lower():
-                    return col
-            return None
+        # 1. Añadir 3 columnas vacías después de "Date"
+        date_col_index = df.columns.get_loc("Date") + 1
+        df.insert(date_col_index, "YYYY", "")
+        df.insert(date_col_index + 1, "MM", "")
+        df.insert(date_col_index + 2, "DD", "")
 
-        date_col = find_col(df, "date")
-        machine_col = find_col(df, "machine")
-        shift_col = find_col(df, "shift")
+        # 2. Dividir la columna Date usando "-" en YYYY, MM, DD
+        date_split = df["Date"].astype(str).str.split("-", expand=True)
+        df["YYYY"] = date_split[0]
+        df["MM"] = date_split[1]
+        df["DD"] = date_split[2]
+        df.drop(["Date","Unplanned"], axis=1, inplace=True)
 
-        if date_col is None or machine_col is None or shift_col is None:
-            st.error("No se detectaron columnas 'Date', 'Machine' o 'Shift'. Columnas encontradas:\n" + ", ".join(map(str, df.columns)))
-            st.dataframe(df.head())
-        else:
-            # 1) Insertar YYYY, MM, DD justo después de Date (si no existen)
-            cols = list(df.columns)
-            date_idx = cols.index(date_col) + 1
-            for newcol in ["YYYY", "MM", "DD"]:
-                if newcol not in df.columns:
-                    df.insert(date_idx, newcol, "")
-                    date_idx += 1
-
-            # 2) Split Date por '-' (fallback a parseo si no tiene '-')
-            date_series = df[date_col].astype(str).str.strip()
-            parts = date_series.str.split("-", expand=True)
-            if parts.shape[1] >= 3:
-                df["YYYY"] = parts[0]
-                df["MM"]  = parts[1]
-                df["DD"]  = parts[2]
-            else:
-                # fallback: usar to_datetime y extraer
-                parsed = pd.to_datetime(date_series, errors="coerce", dayfirst=False)
-                df["YYYY"] = parsed.dt.year.astype("Int64").astype(str)
-                df["MM"]  = parsed.dt.month.astype("Int64").astype(str).str.zfill(2)
-                df["DD"]  = parsed.dt.day.astype("Int64").astype(str).str.zfill(2)
-
-            # 3) Filtrar solo filas con Shift == "Daily" (limpiando espacios y case)
-            df = df[df[shift_col].astype(str).str.strip().str.lower() == "daily"].copy()
-
-            # 4) Reemplazo de Machine usando coincidencias parciales (más flexible)
-            machine_patterns = {
-                "Recken 7050 (JATCO)": ["83947050", "7050", "bancos de prueba", "7050)"],
-                "Recken 7150 (HYUNDAI)": ["83947150", "7150", "7150)"],
-                "Recken 7250 (GM)": ["83947250", "7250"],
-                "VPK 1": ["12525645", "estación de inspección 100% (1)", "estacion de inspeccion 100% (1)"],
-                "VPK 2": ["12710703", "estación de inspección 100% (2)", "estacion de inspeccion 100% (2)"]
+        #3. Filtrado por "Daily"
+        df = df.groupby('Shift').get_group('Daily')
+        # 4. Reemplazar nombres en Machine
+        machine_map = {
+            "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
+            "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
+            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+            "12525645 | Estación de inspección 100% (1)": "VPK 1",
+            "12710703 | Estación de inspección 100% (2)": "VPK 2"
             }
-
-            def map_machine(val):
-                s = str(val).lower()
-                for new_name, patterns in machine_patterns.items():
-                    for p in patterns:
-                        if p.lower() in s:
-                            return new_name
-                return val  # si no coincide, conservar original
-
-            df[machine_col] = df[machine_col].apply(map_machine)
-
-            # Mostrar la tabla final procesada
-            st.subheader("✅ Tabla OEE procesada (filtrada y renombrada):")
-            st.dataframe(df, use_container_width=True)
-
-            # Ofrecer descarga del CSV procesado
-            csv_bytes = df.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇️ Descargar OEE procesado (CSV)", data=csv_bytes, file_name="OEE_processed.csv", mime="text/csv")
-
-            st.info(f"Archivo usado: {sql_key}")
+        df["Machine"] = df["Machine"].replace(machine_map)
+        
+        df_Recken7050 = df.groupby('Machine').get_group('Recken 7050 (JATCO)')
+        df_Recken7150 = df.groupby('Machine').get_group('Recken 7150 (HYUNDAI)')
+        df_Recken7250 = df.groupby('Machine').get_group('Recken 7250 (GM)')
+        df_VPK1 = df.groupby('Machine').get_group('VPK 1')
+        df_VPK2 = df.groupby('Machine').get_group('VPK 2')
+        
+        dias = df["DD"]
+        oee_recken7050 = df_Recken7050["Act.-OEE [%]"]
+        oee_recken7150 = df_Recken7150["Act.-OEE [%]"]
+        oee_recken7250 = df_Recken7250["Act.-OEE [%]"]
+        oee_vpk1 = df_VPK1["Act.-OEE [%]"]
+        oee_vpk2 = df_VPK2["Act.-OEE [%]"]
+        
+        target_Recken = 85
+        target_VPK = 65
