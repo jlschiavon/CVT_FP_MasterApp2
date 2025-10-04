@@ -126,4 +126,4 @@ elif section == "OEE":
         df["Machine"] = df["Machine"].replace(machine_map)
 
         # Mostrar tabla final
-        st.dataframe(df)
+        st.header(df, 30)
