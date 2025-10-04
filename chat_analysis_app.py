@@ -138,13 +138,9 @@ else:
             "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
             "12525645 | Estación de inspección 100% (1)": "VPK 1",
             "12710703 | Estación de inspección 100% (2)": "VPK 2"
-        }
+            }
+        
         df["Machine"] = df["Machine"].replace(machine_map)
-
-        # Mostrar todos los DataFrames de cada máquina con scroll
-        for machine in df["Machine"].unique():
-            st.subheader(f"{machine} - Fecha: {day:02d}/{month:02d}/{year}")
-            st.dataframe(df[df["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
         # --- Mostrar tabla por máquina ---
         for machine in df_filtered["Machine"].unique():
