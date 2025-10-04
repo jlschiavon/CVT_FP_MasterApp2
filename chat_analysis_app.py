@@ -114,10 +114,7 @@ elif st.session_state.section == "OEE":
         # Mostrar todos los DataFrames de cada máquina con scroll
         for machine in df["Machine"].unique():
             st.subheader(f"{machine}")
-            st.dataframe(df, column_config={"Machine": None})
-            st.dataframe(df, column_config={"YYYY": None})
-            st.dataframe(df, column_config={"MM": None})
-            st.dataframe(df[df["Machine"] == machine])
+            st.dataframe(df[df["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
 # --- Secciones genéricas ---
 elif st.session_state.section in expected_files:
