@@ -99,6 +99,15 @@ elif st.session_state.section == "OEE":
         df["DD"] = date_split[2]
         df.drop(["Date","Unplanned"], axis=1, inplace=True)
         # Convertir columna DD, MM, YYYY a tipo entero para comparación
+        # Convertir columnas a enteros de forma segura
+        df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
+        df["MM"] = pd.to_numeric(df["MM"], errors="coerce")
+        df["YYYY"] = pd.to_numeric(df["YYYY"], errors="coerce")
+        
+        # Opcional: eliminar filas donde DD, MM o YYYY sean NaN
+        df = df.dropna(subset=["DD", "MM", "YYYY"])
+        
+        # Convertir a int después de limpiar NaN
         df["DD"] = df["DD"].astype(int)
         df["MM"] = df["MM"].astype(int)
         df["YYYY"] = df["YYYY"].astype(int)
