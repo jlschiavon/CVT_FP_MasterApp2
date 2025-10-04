@@ -145,3 +145,6 @@ elif section == "OEE":
         
         target_Recken = 85
         target_VPK = 65
+
+        # 5. Imprimir DF
+        print(df_Recken7050.head(30))
