@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import date
 
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
@@ -97,6 +98,33 @@ elif st.session_state.section == "OEE":
         df["MM"] = date_split[1]
         df["DD"] = date_split[2]
         df.drop(["Date","Unplanned"], axis=1, inplace=True)
+        # Convertir columna DD, MM, YYYY a tipo entero para comparación
+        df["DD"] = df["DD"].astype(int)
+        df["MM"] = df["MM"].astype(int)
+        df["YYYY"] = df["YYYY"].astype(int)
+
+        # --- Selector de fecha ---
+        selected_date = st.date_input(
+            "Seleccione la fecha para mostrar OEE",
+            value=pd.to_datetime("today")
+        )
+
+        # Extraer día, mes, año de la fecha seleccionada
+        day = selected_date.day
+        month = selected_date.month
+        year = selected_date.year
+        
+        # --- Filtrado ---
+        # Si el usuario no toca el selector (fecha hoy) se mantiene Daily
+        # Si selecciona otra fecha, filtramos todas las filas de esa fecha independientemente del Shift
+        if selected_date == pd.to_datetime("today"):
+            df_filtered = df[df["Shift"] == "Daily"]
+        else:
+            df_filtered = df[
+                (df["DD"] == day) &
+                (df["MM"] == month) &
+                (df["YYYY"] == year)
+            ]
 
         # 3. Filtrar solo "Daily"
         df = df[df["Shift"] == "Daily"]
@@ -113,7 +141,7 @@ elif st.session_state.section == "OEE":
 
         # Mostrar todos los DataFrames de cada máquina con scroll
         for machine in df["Machine"].unique():
-            st.subheader(f"{machine}")
+            st.subheader(f"{machine} - Fecha: {day:02d}/{month:02d}/{year}")
             st.dataframe(df[df["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
 # --- Secciones genéricas ---
