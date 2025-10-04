@@ -16,8 +16,8 @@ if 'section' not in st.session_state:
 
 # --- Definir archivos esperados ---
 expected_files = {
-    "OEE": {"keywords": ["SQLReport"], "format": ["xls", "xlsx", "csv"]},
-    "Production": {"keywords": ["correctionQty", "05 - Overview", "31 - Overview","recken", "vpk", "EXPORT"], "format": ["xls", "xlsx"]},
+    "OEE": {"keywords": ["SQLReport", , "recken", "vpk"], "format": ["xls", "xlsx", "csv"]},
+    "Production": {"keywords": ["correctionQty", "05 - Overview", "31 - Overview", "EXPORT"], "format": ["xls", "xlsx"]},
     "Scrap": {"keywords": ["EXPORT"], "format": ["xls", "xlsx"]},
     "Paros": {"keywords": ["n2", "n3"], "format": ["txt"]},
     "Oil Tracking": {"keywords": ["Tracking Consumo de ATF"], "format": ["xls", "xlsx"]},
@@ -78,8 +78,8 @@ if section == "upload":
         st.write(f"{sect}: {status}")
 
 # ---- Sección OEE robusta ----
-elif section == "OEE":
-    st.header("📊 Sección: OEE (Procesamiento de SQLReport)")
+if section == "OEE":
+    st.header("📊 OEE")
 
     # Buscar archivo con keyword SQLReport
     sql_file = None
