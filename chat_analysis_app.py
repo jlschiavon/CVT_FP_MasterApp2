@@ -16,8 +16,8 @@ if 'section' not in st.session_state:
 
 # --- Definir archivos esperados ---
 expected_files = {
-    "OEE": {"keywords": ["SQLReport", "recken", "vpk"], "format": ["xls", "xlsx", "csv"]},
-    "Production": {"keywords": ["correctionQty", "05 - Overview", "31 - Overview", "EXPORT"], "format": ["xls", "xlsx"]},
+    "OEE": {"keywords": ["SQLReport"], "format": ["xls", "xlsx", "csv"]},
+    "Production": {"keywords": ["correctionQty", "05 - Overview", "31 - Overview","recken", "vpk", "EXPORT"], "format": ["xls", "xlsx"]},
     "Scrap": {"keywords": ["EXPORT"], "format": ["xls", "xlsx"]},
     "Paros": {"keywords": ["n2", "n3"], "format": ["txt"]},
     "Oil Tracking": {"keywords": ["Tracking Consumo de ATF"], "format": ["xls", "xlsx"]},
@@ -76,18 +76,6 @@ if section == "upload":
                 status = "✅"
                 break
         st.write(f"{sect}: {status}")
-
-# --- Ejemplo de análisis según sección ---
-elif section in expected_files:
-    st.header(f"📊 Sección: {section}")
-    # Mostrar el primer archivo cargado que corresponda a la sección
-    for kw in expected_files[section]["keywords"]:
-        if kw in st.session_state.files:
-            st.write(st.session_state.files[kw].head())
-            break
-    else:
-        st.warning("No se han cargado archivos para esta sección aún.")
-
 
 # ---- Sección OEE robusta ----
 elif section == "OEE":
