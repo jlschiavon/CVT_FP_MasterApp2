@@ -131,19 +131,19 @@ else:
     df_filtered = df.copy()  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
 
 
-        # 4. Reemplazar nombres de Machine
-        machine_map = {
-            "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
-            "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
-            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
-            "12525645 | Estación de inspección 100% (1)": "VPK 1",
-            "12710703 | Estación de inspección 100% (2)": "VPK 2"
-            }
+    # 4. Reemplazar nombres de Machine
+    machine_map = {
+        "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
+        "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
+        "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+        "12525645 | Estación de inspección 100% (1)": "VPK 1",
+        "12710703 | Estación de inspección 100% (2)": "VPK 2"
+        }
         
-        df["Machine"] = df["Machine"].replace(machine_map)
+    df["Machine"] = df["Machine"].replace(machine_map)
 
-        # --- Mostrar tabla por máquina ---
-        for machine in df_filtered["Machine"].unique():
+# --- Mostrar tabla por máquina ---
+for machine in df_filtered["Machine"].unique():
             st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
             st.dataframe(df_filtered[df_filtered["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
