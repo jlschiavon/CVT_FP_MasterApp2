@@ -171,7 +171,7 @@ for machine in df_filtered["Machine"].unique():
 
     # Determinar la función de color según el tipo de máquina
     if "Recken" in machine:
-        df_styled = df_machine.style.applymap(color_oee_recken, subset=["Shift", "Act.-OEE [%]"])
+        df_styled = df_machine.style.applymap(color_oee_recken, subset=["Act.-OEE [%]"])
     elif "VPK" in machine:
         df_styled = df_machine.style.applymap(color_oee_vpk, subset=["Act.-OEE [%]"])
     else:
