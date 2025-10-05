@@ -55,3 +55,4 @@ def procesar_alds_recken(df):
     ALDS_Recken = ALDS_Recken.sort_values(['Shift','Parte']).reset_index(drop=True)
 
     return ALDS_Recken
+
