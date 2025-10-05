@@ -241,10 +241,10 @@ st.markdown("### 🏭 OEE por Máquina")
 machine_cols = st.columns(len(oee_dict))
 for idx, (machine, val) in enumerate(oee_dict.items()):
     color = (
-    "green"
+    "red"
     if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
         or ("VPK" in machine and (60 <= val <= 70)))
-    else "red"
+    else "green"
 )
 
     with machine_cols[idx]:
