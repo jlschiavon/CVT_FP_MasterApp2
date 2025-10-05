@@ -128,7 +128,7 @@ if selected_date:
     ]
 else:
     # Si no selecciona fecha: mostrar toda la tabla tal como estaba
-    df_filtered.groupby("Shift").get_group("Daily")  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
+    df_filtered.groupby('Shift').get_group('Daily')  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
 
 
     # 4. Reemplazar nombres de Machine
