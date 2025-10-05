@@ -302,7 +302,10 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
-import matplotlib.pyplot as plt
+
+st.markdown("---")  # Separador visual
+st.header("📊 Gráficas de OEE")
+
 
 # Filtrar solo las 3 máquinas Recken y Shift == "Daily"
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
