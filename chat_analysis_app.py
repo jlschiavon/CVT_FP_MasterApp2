@@ -411,7 +411,7 @@ elif st.session_state.section == "Production":
 
     if st.button("🚀 Process Production Data - Recken"):
         try:
-            recken_alds_clean = cargar_alds({"05 - Overview": recken_alds_df})
+            recken_alds_clean = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
 
             if recken_alds_clean is None or recken_alds_clean.empty:
                 st.error("❌ Error: cargar_alds no devolvió datos válidos para Recken.")
