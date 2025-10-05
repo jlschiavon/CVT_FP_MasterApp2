@@ -61,4 +61,4 @@ ALDS_Recken = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
     ALDS_Recken.drop([12,13,14,15], axis=0, inplace=True)  # Eliminar filas no deseadas
     
     
-    return pd.Dataframe(ALDS_Recken)
+    return pd.DataFrame(ALDS_Recken)
