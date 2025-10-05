@@ -434,4 +434,4 @@ elif st.session_state.section == "Production":
 
 
         # PRUEBAS
-        print(df_alds.head(10))
+        st.dataframe(df_alds, hide_index=True)
