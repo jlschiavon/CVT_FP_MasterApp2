@@ -17,6 +17,7 @@ print(os.listdir("utils"))
 
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
+st.title("Master App CVT Final Processes")
 
 # --- Inicializar estado ---
 if 'files' not in st.session_state:
@@ -365,45 +366,43 @@ elif st.session_state.section == "OEE":
 # ================================
 elif st.session_state.section == "Production":
     st.header("📊 Production")
-    st.subheader("📊 Preloading Production")
 
-    shifts = ["1st Shift", "2nd Shift", "3rd Shift"]
-    orden_partes = [
-        "L-0G005-1036-17",
-        "L-0G005-0095-41",
-        "L-0G005-1015-05",
-        "L-0G005-1043-12"
-    ]
-    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
+    # --- Buscar archivos necesarios desde st.session_state.files ---
+    alds_df = None
+    mes_df = None
+    oee_df = None
 
-    # Variables de estado para almacenar chatarra fisica
-    if "scrap_fisico_df" not in st.session_state:
-        st.session_state.scrap_fisico_df = {
-            (shift, parte): 0
-            for shift in ["1st Shift", "2nd Shift", "3rd Shift"]
-            for parte in [
-                "L-0G005-1036-17",
-                "L-0G005-0095-41",
-                "L-0G005-1015-05",
-                "L-0G005-1043-12",
-            ]
-        }
-        
-        # --- PANEL LATERAL PARA INGRESO DE CHATARRA FÍSICA ---
-        st.sidebar.header("Ingreso de chatarra física")
-        turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
-        partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
-        
-        for turno in turnos:
-            st.sidebar.subheader(turno)
-            for i, parte in enumerate(partes):
-                orden_key = f"{i:02d}_{turno}_{parte}"
-                st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
-                    f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
-                )
-        
-        # --- Carga de archivos ---
-        st.sidebar.header("Carga de archivos")
-        alds_file = st.sidebar.file_uploader("Archivo ALDS (.xlsx)", type="xlsx")
-        mes_file = st.sidebar.file_uploader("Archivo MES (.xlsx)", type=["xlsx"])
-        oee_file = st.sidebar.file_uploader("Archivo OEE (.xlsx)", type="xlsx")
+    # Buscar por palabras clave registradas en expected_files["Production"]
+    for key, df in st.session_state.files.items():
+        lower_key = key.lower()
+        if "overview" in lower_key:  # Archivos ALDS o MES
+            if "05" in lower_key or "31" in lower_key:
+                alds_df = df  # ALDS
+            else:
+                mes_df = df  # MES
+        elif "sqlreport" in lower_key or "recken" in lower_key or "oee" in lower_key:
+            oee_df = df  # OEE
+
+    # Mostrar estado
+    st.subheader("📦 Archivos Detectados Automáticamente")
+    st.write(f"ALDS: {'✅' if alds_df is not None else '❌'}")
+    st.write(f"MES: {'✅' if mes_df is not None else '❌'}")
+    st.write(f"OEE: {'✅' if oee_df is not None else '❌'}")
+
+    # Si falta algún archivo, advertir y no continuar
+    if not all([alds_df is not None, mes_df is not None, oee_df is not None]):
+        st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
+    else:
+        st.success("✅ Archivos listos para procesar Production")
+
+        # Aquí puedes colocar el procesamiento que ya tenías:
+
+        st.subheader("📊 Preloading Production (Demo)")
+        st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
+
+        # Ejemplo de procesamiento:
+        # df_alds = cargar_alds(alds_df)
+        # df_mes = cargar_mes(mes_df)
+        # df_oee = cargar_oee(oee_df)
+        # tabla_final = generar_union_final(df_alds, df_mes, df_oee)
+        # st.dataframe(tabla_final)
