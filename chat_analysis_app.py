@@ -184,20 +184,28 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Función para calcular OEE ---
-def calc_oee(df_machine):
+def calc_oee_real(df_machine):
     # Filtrar registros donde Shift != "Daily"
-    df_shift = df_machine[df_machine["Shift"] != "Daily"]
+    df_shift = df_machine[df_machine["Shift"] != "Daily"].copy()
     if df_shift.empty:
         return None
-    # Fórmula OEE: (Production min / Planned min plan op) * (Planned min Prod qty / Production min) * (Yield qty / Prod qty)
+
+    # Reemplazar NaN por 0 en las columnas que intervienen en el cálculo
+    cols = [
+        "Production min.", "Planned min. (plan. op. time)",
+        "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
+    ]
+    df_shift[cols] = df_shift[cols].fillna(0)
+
+    # Calcular OEE usando la fórmula
     oee_series = (
         (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
         (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
-    # Retornar promedio en porcentaje
-    return oee_series * 100
+
+    return oee_series.mean() * 100
+
 
 # --- Agrupar máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
