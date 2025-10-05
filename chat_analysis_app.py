@@ -128,7 +128,7 @@ if selected_date:
     ]
 else:
     # Si no selecciona fecha: mostrar toda la tabla tal como estaba
-    df[df["Shift"]=="Daily"]
+    df_filtered[df_filtered["Shift"]=="Daily"]
 
 
     # 4. Reemplazar nombres de Machine
