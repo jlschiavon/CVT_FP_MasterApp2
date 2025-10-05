@@ -401,8 +401,8 @@ elif st.session_state.section == "Production":
     st.write(f"MES_Recken: {'✅' if recken_mes_df is not None else '❌'}")
     st.write(f"OEE_Recken: {'✅' if recken_oee_df is not None else '❌'}")
 
-    if not any([recken_alds_df, recken_mes_df, recken_oee_df]):
-        st.warning("⚠ Faltan archivos para iniciar el análisis de Producción Recken. Ve a Cargar Archivos.")
+    if not any([recken_alds_df is not None, recken_mes_df is not None, recken_oee_df is not None]):
+        st.warning("⚠ Faltan archivos para iniciar el análisis de Producción Recken.")
         st.stop()
     else:
         st.success("✅ Archivos listos para procesar Producción Recken")
