@@ -356,3 +356,52 @@ if not df_plot.empty:
 else:
     st.warning("No hay datos disponibles para las máquinas Recken")
 
+#------------- GRÁFICAS VPK
+vpk_machines = ["VPK 1", "VPK 2"]
+df_plot_vpk = df_filtered[
+    (df_filtered["Machine"].isin(vpk_machines)) &
+    (df_filtered["Shift"] == "Daily")
+].copy()
+
+if not df_plot_vpk.empty:
+    plt.figure(figsize=(12,4))  # menos alto para visual más compacto
+
+    # Colores distintos para cada máquina VPK
+    colors_vpk = {
+        "VPK 1": "#9C27B0",  # morado
+        "VPK 2": "#FF5722"   # naranja rojizo
+    }
+
+    # Agrupar por máquina
+    for machine in vpk_machines:
+        df_machine = df_plot_vpk[df_plot_vpk["Machine"] == machine]
+        plt.bar(
+            df_machine["DD"] + vpk_machines.index(machine)*0.2,  # desplazamiento para evitar superposición
+            df_machine["Act.-OEE [%]"],
+            width=0.2,
+            color=colors_vpk[machine],
+            label=machine,
+            edgecolor='black'
+        )
+
+    # Línea del target
+    plt.axhline(y=target_vpk, color='red', linestyle='--', linewidth=2, label=f'Target {target_vpk}%')
+
+    # Configuración de ejes
+    plt.xticks(range(1,32))  # días del mes
+    plt.yticks(range(0, 125, 5))
+    plt.ylim(0, 120)
+    plt.xlabel("Día del mes")
+    plt.ylabel("OEE [%]")
+    plt.title("Evolución diaria de OEE - Máquinas VPK")
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
+
+    # Leyenda horizontal abajo, más pequeña
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
+               ncol=len(vpk_machines)+1, fontsize=10)
+
+    st.pyplot(plt.gcf())
+    plt.clf()
+else:
+    st.warning("No hay datos disponibles para las máquinas VPK")
+
