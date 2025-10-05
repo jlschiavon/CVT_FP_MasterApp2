@@ -128,7 +128,7 @@ if selected_date:
     ]
 else:
     # Si no selecciona fecha: mostrar toda la tabla tal como estaba
-    df_filtered = df.copy()  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
+    df_filtered.groupby("Shift").get_group("Daily")  # o df[df["Shift"]=="Daily"] si quieres mantener solo Daily
 
 
     # 4. Reemplazar nombres de Machine
@@ -140,7 +140,7 @@ else:
         "12710703 | Estación de inspección 100% (2)": "VPK 2"
         }
         
-    df["Machine"] = df["Machine"].replace(machine_map)
+    df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
 
 # --- Mostrar tabla por máquina ---
 for machine in df_filtered["Machine"].unique():
