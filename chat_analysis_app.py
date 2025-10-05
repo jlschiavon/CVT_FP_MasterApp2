@@ -406,7 +406,9 @@ else:
     st.warning("No hay datos disponibles para las máquinas VPK")
 
 # --- Sección Production: Reckens ---
-st.header("📊 Producción - Reckens")
+elif st.session_state.section == "Production":
+st.header("📊 Production")
+st.subheader("Recken")
 
 # Buscar archivo Reckens
 recken_file = None
