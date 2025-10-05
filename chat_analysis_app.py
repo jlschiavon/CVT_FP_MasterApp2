@@ -302,50 +302,38 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
-import matplotlib.pyplot as plt
-import seaborn as sns
+# --- Preparar DataFrame para gráficas ---
+# Filtrar solo registros que no sean "Daily"
+df_plot = df_filtered[df_filtered["Shift"] != "Daily"].copy()
 
-# --- Preparar datos para la gráfica ---
-machines = list(oee_dict.keys())
-oee_values = [0 if np.isnan(v) else v for v in oee_dict.values()]
-colors = []
+# Crear columna datetime
+df_plot["Date_dt"] = pd.to_datetime(df_plot[["YYYY","MM","DD"]])
 
-for m, v in zip(machines, oee_values):
-    if "Recken" in m:
-        colors.append("green" if target_recken - 5 <= v <= target_recken + 5 else "red")
-    elif "VPK" in m:
-        colors.append("green" if target_vpk - 5 <= v <= target_vpk + 5 else "red")
-    else:
-        colors.append("gray")
+# Máquinas a graficar
+all_machines = recken_machines + vpk_machines
 
-# --- Graficar OEE por máquina ---
-st.markdown("### 📊 Gráfica OEE por Máquina")
-plt.figure(figsize=(10,6))
-sns.barplot(x=machines, y=oee_values, palette=colors)
+# --- Graficar ---
+st.markdown("### 📈 Evolución OEE Act.-[%] por Máquina")
+
+plt.figure(figsize=(14,7))
+for m in all_machines:
+    df_m = df_plot[df_plot["Machine"] == m]
+    if df_m.empty:
+        continue
+    # Reemplazar NaN por 0 para graficar
+    y_values = df_m["Act.-OEE [%]"].fillna(0)
+    plt.plot(df_m["Date_dt"], y_values, marker='o', label=m)
+
+# Configurar formato de fechas en eje x
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+plt.xticks(rotation=45)
 plt.ylim(0, 120)
 plt.ylabel("OEE [%]")
-plt.xlabel("Máquina")
-plt.title("OEE por Máquina")
-for i, v in enumerate(oee_values):
-    plt.text(i, v + 1, f"{v:.1f}%", ha='center', fontweight='bold')
-st.pyplot(plt.gcf())
-plt.clf()
-
-# --- Graficar OEE global por grupo ---
-st.markdown("### 📊 Gráfica OEE Global por Grupo")
-groups = ["Recken Global", "VPK Global"]
-global_values = [oee_global_recken, oee_global_vpk]
-group_colors = [
-    "green" if target_recken - 5 <= oee_global_recken <= target_recken + 5 else "red",
-    "green" if target_vpk - 5 <= oee_global_vpk <= target_vpk + 5 else "red"
-]
-
-plt.figure(figsize=(6,6))
-sns.barplot(x=groups, y=global_values, palette=group_colors)
-plt.ylim(0, 120)
-plt.ylabel("OEE [%]")
-for i, v in enumerate(global_values):
-    display_val = 0 if np.isnan(v) else v
-    plt.text(i, display_val + 1, f"{display_val:.1f}%", ha='center', fontweight='bold')
+plt.xlabel("Fecha")
+plt.title("Evolución diaria del OEE por Máquina")
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.legend()
+plt.tight_layout()
 st.pyplot(plt.gcf())
 plt.clf()
