@@ -190,13 +190,6 @@ def calc_oee_real(df_machine):
     if df_shift.empty:
         return None
 
-    # Reemplazar NaN por 0 en las columnas que intervienen en el cálculo
-    cols = [
-        "Production min.", "Planned min. (plan. op. time)",
-        "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
-    ]
-    df_shift[cols] = df_shift[cols].fillna(0)
-
     # Calcular OEE usando la fórmula
     oee_series = (
         (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
