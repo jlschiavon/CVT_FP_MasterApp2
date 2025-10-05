@@ -11,8 +11,11 @@ def cargar_alds(files_dict):
             return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
+
 def procesar_alds_recken(df):
     df = df.copy()
+    
+    # Renombrar columnas
     column_map = {
         'Unnamed: 1': 'Station',
         'Unnamed: 10': 'Shift',
@@ -27,29 +30,34 @@ def procesar_alds_recken(df):
     }
     df.rename(columns=column_map, inplace=True)
 
+    # Extraer fecha (opcional)
     df[['DD','MM','YYYY']] = df['Date'].astype(str).str.split(".", expand=True)
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
+    
+    # Completar nombres de estaciones
     df['Station'] = df['Station'].where(df['Station'].str.startswith("Reckstation", na=False)).ffill()
 
+    # Convertir a numérico
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
-    df.drop([12,13,14,15], axis = 0, inplace=True, errors='ignore')
+    # Eliminar filas finales vacías si existen
+    df.drop([12,13,14,15], axis=0, inplace=True, errors='ignore')
 
-    # ===== Sumar Serie y Rework por Shift y Parte usando tu lógica =====
-    # Crear índice completo para reindexar después
-    import itertools
+    # Crear índice completo para asegurar que todas las combinaciones Shift + Parte estén presentes
     index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
 
+    # ===== Sumar Serie y Rework por Shift y Parte =====
     ALDS = []
     for shift in shifts:
         df_shift = df[df["Shift"] == shift]
         for parte in orden_partes:
             if parte not in df.columns:
                 continue
-            filtro = df_shift[parte] != 0
-            total_serie = df_shift.loc[filtro, "Serie Parts"].sum() if filtro.any() else 0
-            total_rework = df_shift.loc[filtro, "Rework Parts"].sum() if filtro.any() else 0
+            # Sumar Serie: toda la columna de la parte
+            total_serie = df_shift[parte].sum()
+            # Sumar Rework: solo donde Rework Parts > 0
+            total_rework = df_shift.loc[df_shift["Rework Parts"] > 0, "Rework Parts"].sum()
             ALDS.append({
                 "Shift": shift,
                 "Parte": parte,
@@ -59,4 +67,3 @@ def procesar_alds_recken(df):
 
     ALDS_Recken = pd.DataFrame(ALDS).set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
     return ALDS_Recken
-
