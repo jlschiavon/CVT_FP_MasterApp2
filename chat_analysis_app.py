@@ -103,7 +103,7 @@ elif st.session_state.section == "OEE":
         # Convertir columna DD, MM, YYYY a tipo entero para comparación
         
 # Convertir columnas a enteros de forma segura
-df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
+#df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
 df["MM"] = pd.to_numeric(df["MM"], errors="coerce")
 df["YYYY"] = pd.to_numeric(df["YYYY"], errors="coerce")
 df = df.dropna(subset=["DD", "MM", "YYYY"])
