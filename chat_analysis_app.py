@@ -214,37 +214,15 @@ for m in recken_machines + vpk_machines:
 oee_global_recken = np.mean([oee_dict[m] for m in recken_machines if m in oee_dict])
 oee_global_vpk = np.mean([oee_dict[m] for m in vpk_machines if m in oee_dict])
 
-# --- Mostrar tarjetas ---
-st.markdown("### 📊 OEE Global por Grupo")
-cols = st.columns(2)
-
-with cols[0]:
-    color = "green" if oee_global_recken < (target_recken - 5) or oee_global_recken > (target_recken + 5) else "red"
-    st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
-        <h4 style='color:black'>Recken Global</h4>
-        <h2 style='color:black'>{oee_global_recken:.1f}%</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-with cols[1]:
-    color = "green" if oee_global_vpk < (target_vpk - 5) or oee_global_vpk > (target_vpk + 5) else "red"
-    st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
-        <h4 style='color:black'>VPK Global</h4>
-        <h2 style='color:black'>{oee_global_vpk:.1f}%</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
 # --- Mostrar OEE por máquina ---
 st.markdown("### 🏭 OEE por Máquina")
 machine_cols = st.columns(len(oee_dict))
 for idx, (machine, val) in enumerate(oee_dict.items()):
     color = (
-    "red"
+    "green"
     if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
-        or ("VPK" in machine and (60 <= val <= 70)))
-    else "green"
+        or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)))
+    else "red"
 )
 
     with machine_cols[idx]:
@@ -254,4 +232,28 @@ for idx, (machine, val) in enumerate(oee_dict.items()):
             <h3 style='color:black'>{val:.1f}%</h3>
         </div>
         """, unsafe_allow_html=True)
+
+# --- Mostrar tarjetas ---
+st.markdown("### 📊 OEE Global por Grupo")
+cols = st.columns(2)
+
+with cols[0]:
+    color = "green" if (target_recken - 5 <= val <= target_recken + 5) else "red"
+    st.markdown(f"""
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
+        <h4 style='color:black'>Recken Global</h4>
+        <h2 style='color:black'>{oee_global_recken:.1f}%</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with cols[1]:
+    color = "green" if (target_vpk - 5 <= val <= target_vpk + 5) else "red"
+    st.markdown(f"""
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
+        <h4 style='color:black'>VPK Global</h4>
+        <h2 style='color:black'>{oee_global_vpk:.1f}%</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 
