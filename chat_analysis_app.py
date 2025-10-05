@@ -142,8 +142,40 @@ machine_map = {
         
 df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
 
-# --- Mostrar tabla por máquina ---
-for machine in df_filtered["Machine"].unique():
-            st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
-            st.dataframe(df_filtered[df_filtered["Machine"] == machine], hide_index=1, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
+# función de colores vs target
+target_recken = 85
+target_vpk = 65
 
+def color_oee_recken(val):
+    if pd.isna(val):
+        return ""
+    elif val < target_recken - 5 and val > target_recken + 5:
+        return "background-color: lightgreen"
+    else: 
+        return "background-color: lightcoral" 
+            
+def color_oee_vpk(val):
+    if pd.isna(val):
+        return ""
+    elif val < target_vpk - 5 and val > target_vpk + 5:
+        return "background-color: lightgreen"
+    else: 
+        return "background-color: lightcoral"
+
+# --- Mostrar tabla por máquina con colores según target ---
+for machine in df_filtered["Machine"].unique():
+    st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
+
+    # Seleccionar DataFrame de la máquina
+    df_machine = df_filtered[df_filtered["Machine"] == machine]
+
+    # Determinar la función de color según el tipo de máquina
+    if "Recken" in machine:
+        df_styled = df_machine.style.applymap(color_oee_recken, subset=["Act.-OEE [%]"])
+    elif "VPK" in machine:
+        df_styled = df_machine.style.applymap(color_oee_vpk, subset=["Act.-OEE [%]"])
+    else:
+        df_styled = df_machine  # Si es otro tipo de máquina, sin coloreado
+
+    # Mostrar la tabla en Streamlit
+    st.dataframe(df_styled, hide_index=True, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
