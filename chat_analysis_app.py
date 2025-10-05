@@ -131,16 +131,16 @@ else:
     df_filtered=df[df["Shift"]=="Daily"]
 
 
-    # 4. Reemplazar nombres de Machine
-    machine_map = {
-        "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
-        "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
-        "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
-        "12525645 | Estación de inspección 100% (1)": "VPK 1",
-        "12710703 | Estación de inspección 100% (2)": "VPK 2"
-        }
+# 4. Reemplazar nombres de Machine
+machine_map = {
+    "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
+    "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
+    "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+    "12525645 | Estación de inspección 100% (1)": "VPK 1",
+    "12710703 | Estación de inspección 100% (2)": "VPK 2"
+    }
         
-    df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
+df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
 
 # --- Mostrar tabla por máquina ---
 for machine in df_filtered["Machine"].unique():
