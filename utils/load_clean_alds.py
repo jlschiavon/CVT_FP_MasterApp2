@@ -5,13 +5,16 @@ shifts = ["1st Shift", "2nd Shift", "3rd Shift"]
 orden_partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
 
 def cargar_alds(files_dict):
-    # Buscar el archivo que contenga '05 - overview'
+    # Buscar el archivo que contenga '05 - overview' dentro de las keys del diccionario
     for key, df in files_dict.items():
         if "05 - overview" in key.lower():
-            return procesar_df(df)  # llamas al bloque de transformación
-    return None  # Si no encuentra
+            return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
+    
+    return None  # Si no se encuentra
 
-    # Limpieza inicial
+def procesar_alds_recken(df):
+    # ====== LIMPIEZA INICIAL ======
+    df = df.copy()
     df.drop([0,1,2,3,4,5,6,7,8], axis=0, inplace=True)
     df.rename(columns={
         'Unnamed: 5': 'Date',
@@ -23,9 +26,6 @@ def cargar_alds(files_dict):
 
     date_split = df["Date"].astype(str).str.split(".", expand=True)
     df["DD"], df["MM"], df["YYYY"] = date_split[0], date_split[1], date_split[2]
-
-    # Guardar día, mes, año si lo necesitas
-    DAY, MONTH, YEAR = df.loc[0, "DD"], df.loc[0, "MM"], df.loc[0, "YYYY"]
 
     df.drop([0,1,2,3,4], axis=0, inplace=True)
 
@@ -51,6 +51,7 @@ def cargar_alds(files_dict):
     df["Rework Parts"] = pd.to_numeric(df["Rework Parts"], errors="coerce").fillna(0)
     df["Total Parts"] = pd.to_numeric(df["Total Parts"], errors="coerce").fillna(0)
 
+    # ====== AGRUPACIÓN ======
     ALDS = []
     for shift in shifts:
         df_shift = df[df["Shift"] == shift]
@@ -58,8 +59,8 @@ def cargar_alds(files_dict):
             if parte not in df.columns:
                 continue
             filtro = df_shift[parte] != 0
-            total_serie = df_shift.loc[filtro, "Serie Parts"].sum() if filtro.any() else 0
-            total_rework = df_shift.loc[filtro, "Rework Parts"].sum() if filtro.any() else 0
+            total_serie = df_shift.loc[filtro, "Serie Parts"].sum()
+            total_rework = df_shift.loc[filtro, "Rework Parts"].sum()
             ALDS.append({
                 "Shift": shift,
                 "Parte": parte,
@@ -67,4 +68,4 @@ def cargar_alds(files_dict):
                 "ALDS Rework": total_rework
             })
 
-    return pd.DataFrame(df)
+    return pd.DataFrame(ALDS)  # ✅ Ahora sí se devuelve correctamente
