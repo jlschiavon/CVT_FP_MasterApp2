@@ -301,4 +301,20 @@ with cols[1]:
 
 #------------- GRÁFICAS
 dias = df_filtered["DD"]
-df_Recken7150 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)')
+df_Recken7050 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)')
+oee_recken7050 = df_Recken7050["Act.-OEE [%]"]
+
+plt.figure(figsize=(10,6))
+
+plt.plot(dias, oee_recken7050, marker='o', linestyle='-', color='b', label='Recken 7050 (JATCO)')
+
+plt.axhline(85, color='red', linestyle='--', label='Target 85%')
+
+plt.title("OEE por Máquina y Día", fontsize=16)
+plt.xlabel("Día", fontsize=14)
+plt.ylabel("OEE [%]", fontsize=14)
+plt.grid(True)
+plt.legend()
+plt.xticks(rotation=45)
+
+plt.show()
