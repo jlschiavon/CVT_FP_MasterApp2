@@ -50,12 +50,12 @@ def procesar_alds_recken(df):
     df = df.iloc[:-6, :]
 
     # --- Agrupar por Shift y Parte ---
-    serie_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
+    serie_df = df.groupby(['Shift','Serie Parts'])[orden_partes].sum().reset_index().melt(
         id_vars='Shift', value_vars=orden_partes,
         var_name='Parte', value_name='Serie Parts'
     )
 
-    rework_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
+    rework_df = df.groupby(['Shift','Rework Parts'])[orden_partes].sum().reset_index().melt(
         id_vars='Shift', value_vars=orden_partes,
         var_name='Parte', value_name='Rework Parts'
     )
