@@ -15,7 +15,6 @@ def cargar_alds(files_dict):
 def procesar_alds_recken(df):
     df = df.copy()
     
-    # Renombrar columnas
     column_map = {
         'Unnamed: 1': 'Station',
         'Unnamed: 10': 'Shift',
@@ -30,34 +29,26 @@ def procesar_alds_recken(df):
     }
     df.rename(columns=column_map, inplace=True)
 
-    # Extraer fecha (opcional)
     df[['DD','MM','YYYY']] = df['Date'].astype(str).str.split(".", expand=True)
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
     
-    # Completar nombres de estaciones
     df['Station'] = df['Station'].where(df['Station'].str.startswith("Reckstation", na=False)).ffill()
-
-    # Convertir a numérico
+    
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-
-    # Eliminar filas finales vacías si existen
+    
     df.drop([12,13,14,15], axis=0, inplace=True, errors='ignore')
 
-    # Crear índice completo para asegurar que todas las combinaciones Shift + Parte estén presentes
     index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
 
-    # ===== Sumar Serie y Rework por Shift y Parte =====
     ALDS = []
     for shift in shifts:
         df_shift = df[df["Shift"] == shift]
         for parte in orden_partes:
             if parte not in df.columns:
                 continue
-            # Sumar Serie: toda la columna de la parte
-            total_serie = df_shift[parte].sum()
-            # Sumar Rework: solo donde Rework Parts > 0
-            total_rework = df_shift.loc[df_shift["Rework Parts"] > 0, "Rework Parts"].sum()
+            total_serie = df_shift[parte].sum()           # suma todos los valores de esa parte
+            total_rework = df_shift["Rework Parts"].sum() # suma todas las filas de Rework Parts
             ALDS.append({
                 "Shift": shift,
                 "Parte": parte,
