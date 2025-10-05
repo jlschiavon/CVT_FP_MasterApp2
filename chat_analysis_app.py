@@ -221,8 +221,8 @@ if len(oee_dict) > 0:
     for idx, (machine, val) in enumerate(oee_dict.items()):
         color = (
             "green" 
-            if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
-                or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5))) 
+            if ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
+                or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)) 
             else "red"
         )
 
