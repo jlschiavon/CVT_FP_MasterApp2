@@ -4,7 +4,7 @@ import pandas as pd
 shifts = ["1st Shift", "2nd Shift", "3rd Shift"]
 orden_partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
 
-def cargar_alds(files_dict):
+def load_alds(files_dict):
     # Buscar el archivo que contenga '05 - overview' dentro de las keys del diccionario
     for key, df in files_dict.items():
         if "05 - overview" in key.lower():
