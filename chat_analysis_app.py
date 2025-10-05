@@ -301,4 +301,4 @@ with cols[1]:
 
 #------------- GRÁFICAS
 dias = df_filtered["DD"]
-df_Recken7150 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)")
+df_Recken7150 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)')
