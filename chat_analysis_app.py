@@ -361,6 +361,41 @@ elif st.session_state.section == "OEE":
 # ================================
 elif st.session_state.section == "Production":
     st.header("📊 Production")
+    st.subheader("📊 Preloading Production")
 
- 
+    shifts = ["1st Shift", "2nd Shift", "3rd Shift"]
+    orden_partes = [
+        "L-0G005-1036-17",
+        "L-0G005-0095-41",
+        "L-0G005-1015-05",
+        "L-0G005-1043-12"
+    ]
+    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
 
+    # Variables de estado para almacenar chatarra fisica
+    if "scrap_fisico_df" not in st.session_state:
+        st.session_state.scrap_fisico_df = {
+            (shift, parte): 0
+            for shift in ["1st Shift", "2nd Shift", "3rd Shift"]
+            for parte in [
+                "L-0G005-1036-17",
+                "L-0G005-0095-41",
+                "L-0G005-1015-05",
+                "L-0G005-1043-12",
+            ]
+        }
+        
+        # --- PANEL LATERAL PARA INGRESO DE CHATARRA FÍSICA ---
+        st.sidebar.header("Ingreso de chatarra física")
+        turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
+        partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
+        
+        for turno in turnos:
+            st.sidebar.subheader(turno)
+            for i, parte in enumerate(partes):
+                orden_key = f"{i:02d}_{turno}_{parte}"
+                st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
+                    f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
+                )
+
+        
