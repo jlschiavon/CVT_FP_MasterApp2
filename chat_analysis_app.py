@@ -367,6 +367,30 @@ elif st.session_state.section == "OEE":
 elif st.session_state.section == "Production":
     st.header("📊 Production")
 
+    st.subheader("📊 Preloading Production")
+
+    # ✅ Verificar si el archivo con la palabra clave "05 - Overview" está cargado
+    if "05 - Overview" in st.session_state.files:
+        st.success("✅ Archivo '05 - Overview' encontrado y listo para procesar")
+
+        # ✅ Procesar ALDS_Recken con cargar_alds
+        try:
+            ALDS_Recken = cargar_alds(st.session_state.files["05 - Overview"])
+            st.write("✅ Resultado de ALDS_Recken:")
+            st.dataframe(ALDS_Recken, use_container_width=True)
+        except Exception as e:
+            st.error(f"❌ Error al procesar ALDS_Recken: {e}")
+
+    else:
+        st.warning("⚠ No se encontró un archivo que contenga '05 - Overview'. Sube uno en la sección de carga.")
+
+
+
+
+
+
+    
+
     # --- Buscar archivos necesarios desde st.session_state.files ---
     alds_df = None
     mes_df = None
