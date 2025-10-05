@@ -407,34 +407,30 @@ elif st.session_state.section == "Production":
         elif "sqlreport" in lower_key or "recken" in lower_key or "oee" in lower_key:
             oee_df = df  # OEE
 
-    # Mostrar estado
-    st.subheader("📦 Archivos Detectados Automáticamente")
-    st.write(f"ALDS: {'✅' if alds_df is not None else '❌'}")
-    st.write(f"MES: {'✅' if mes_df is not None else '❌'}")
-    st.write(f"OEE: {'✅' if oee_df is not None else '❌'}")
-
-    # Si falta algún archivo, advertir y no continuar
-    if not any([alds_df is not None, mes_df is not None, oee_df is not None]):
-        st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
-    else:
-        st.success("✅ Archivos listos para procesar Production")
-        st.subheader("📊 Preloading Production (Demo)")
-        st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
-        # Ejemplo de procesamiento:
-        tabla_final = None
-        if st.sidebar.button("Procesar datos"):
-            df_alds = cargar_alds(alds_df) if alds_df else None
-            tabla_final = pd.merge(tabla_final, df_alds)
-            st.dataframe(tabla_final, hide_index=True)
-        # Aquí puedes colocar el procesamiento que ya tenías:
-
-
-        # df_mes = cargar_mes(mes_df)
-        # df_oee = cargar_oee(oee_df)
-        # tabla_final = generar_union_final(df_alds, df_mes, df_oee)
-        # st.dataframe(tabla_final)
-
-
-
-        # PRUEBAS
+        # Mostrar estado
+        st.subheader("📦 Archivos Detectados Automáticamente")
+        st.write(f"ALDS: {'✅' if alds_df is not None else '❌'}")
+        st.write(f"MES: {'✅' if mes_df is not None else '❌'}")
+        st.write(f"OEE: {'✅' if oee_df is not None else '❌'}")
         
+        # Si falta algún archivo, advertir y no continuar
+        if not any([alds_df is not None, mes_df is not None, oee_df is not None]):
+            st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
+        else:
+            st.success("✅ Archivos listos para procesar Production")
+            st.subheader("📊 Preloading Production (Demo)")
+            st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
+        
+            # ⬇️ BOTÓN EN PANEL CENTRAL
+            if st.button("🚀 Process Production Data - Recken"):
+                try:
+                    df_alds = cargar_alds(alds_df) if alds_df is not None else None
+        
+                    if df_alds is None or df_alds.empty:
+                        st.error("❌ Error: cargar_alds no devolvió datos. Revisa la función.")
+                    else:
+                        st.success("✅ ALDS_Recken generado correctamente")
+                        st.dataframe(df_alds, use_container_width=True)
+        
+                except Exception as e:
+                    st.error(f"❌ Error procesando ALDS_Recken: {e}")
