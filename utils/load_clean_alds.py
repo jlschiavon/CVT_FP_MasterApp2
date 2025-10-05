@@ -44,7 +44,7 @@ def procesar_alds_recken(df):
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
     # Eliminar filas finales vacías si existen
-    df = df.drop([12,13,14,15], axis=1, inplace = True)
+    df = df.drop([12,13,14,15], axis = 0, inplace = True)
 
     # --- Agrupar por Shift y Parte ---
     serie_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
