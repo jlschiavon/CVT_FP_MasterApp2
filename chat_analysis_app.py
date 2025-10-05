@@ -181,65 +181,82 @@ for machine in df_filtered["Machine"].unique():
     st.dataframe(df_styled, hide_index=True, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
 st.markdown("---")  # Separador visual
-
 st.header("📈 Promedios de Desempeño")
 
-def calc_oee_real(df_machine):
-    # Filtrar registros donde Shift != "Daily"
+# --- Función OEE fórmula ---
+def calc_oee_formula(df_machine):
     df_shift = df_machine[df_machine["Shift"] != "Daily"].copy()
     if df_shift.empty:
         return None
-
-    # Calcular OEE usando la fórmula
+    cols = [
+        "Production min.", "Planned min. (plan. op. time)",
+        "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
+    ]
+    df_shift[cols] = df_shift[cols].fillna(0)
     oee_series = (
         (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
         (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
-
     return oee_series.mean() * 100
 
-
-# --- Agrupar máquinas ---
+# --- Máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
 vpk_machines = ["VPK 1", "VPK 2"]
 
-# --- Calcular OEE por máquina usando la fórmula real ---
+# --- Diccionario de OEE por máquina ---
 oee_dict = {}
-for m in recken_machines + vpk_machines:
-    oee_val = calc_oee_real(df_filtered[df_filtered["Machine"] == m])
-    if oee_val is not None:
+
+if selected_date:  # usuario seleccionó fecha
+    for m in recken_machines + vpk_machines:
+        # Buscar fila Daily de la fecha seleccionada
+        df_daily = df_filtered[
+            (df_filtered["Machine"] == m) &
+            (df_filtered["Shift"] == "Daily") &
+            (df_filtered["DD"] == day) &
+            (df_filtered["MM"] == month) &
+            (df_filtered["YYYY"] == year)
+        ]
+        if not df_daily.empty:
+            oee_dict[m] = df_daily["Act.-OEE [%]"].values[0]
+        else:
+            oee_dict[m] = np.nan
+else:  # no hay fecha seleccionada, calcular usando fórmula
+    for m in recken_machines + vpk_machines:
+        oee_val = calc_oee_formula(df_filtered[df_filtered["Machine"] == m])
         oee_dict[m] = oee_val
 
-# --- Calcular OEE global del período por grupo ---
-oee_global_recken = np.mean([oee_dict[m] for m in recken_machines if m in oee_dict])
-oee_global_vpk = np.mean([oee_dict[m] for m in vpk_machines if m in oee_dict])
+# --- Calcular OEE global por grupo ---
+def calc_global(oee_list):
+    valid_vals = [v for v in oee_list if not np.isnan(v)]
+    if not valid_vals:
+        return np.nan
+    return np.mean(valid_vals)
 
-# --- Mostrar OEE por máquina ---
+oee_global_recken = calc_global([oee_dict[m] for m in recken_machines])
+oee_global_vpk = calc_global([oee_dict[m] for m in vpk_machines])
+
+# --- Mostrar tarjetas por máquina ---
 st.markdown("### 🏭 OEE por Máquina")
-if len(oee_dict) > 0:
-    machine_cols = st.columns(len(oee_dict))
-    for idx, (machine, val) in enumerate(oee_dict.items()):
-        color = (
-            "green"
-            if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
-                or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)))
-            else "red"
-        )
-        with machine_cols[idx]:
-            st.markdown(f"""
-            <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
-                <h5 style='color:black'>{machine}</h5>
-                <h3 style='color:black'>{val:.1f}%</h3>
-            </div>
-            """, unsafe_allow_html=True)
-else:
-    st.info("No hay datos de OEE por máquina para mostrar.")
+machine_cols = st.columns(len(oee_dict))
+for idx, (machine, val) in enumerate(oee_dict.items()):
+    color = (
+        "green"
+        if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
+            or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)))
+        else "red"
+    )
+    with machine_cols[idx]:
+        st.markdown(f"""
+        <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
+            <h5 style='color:black'>{machine}</h5>
+            <h3 style='color:black'>{val:.1f}%</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-# --- Mostrar tarjetas de OEE global ---
+# --- Tarjetas globales ---
 st.markdown("### 📊 OEE Global por Grupo")
 cols = st.columns(2)
-
 with cols[0]:
     color = "green" if (target_recken - 5 <= oee_global_recken <= target_recken + 5) else "red"
     st.markdown(f"""
