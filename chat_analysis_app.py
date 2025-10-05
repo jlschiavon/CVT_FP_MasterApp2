@@ -242,23 +242,26 @@ oee_global_vpk = calc_global([oee_dict[m] for m in vpk_machines])
 st.markdown("### 🏭 OEE por Máquina")
 machine_cols = st.columns(len(oee_dict))
 for idx, (machine, val) in enumerate(oee_dict.items()):
-    color = (
-        "green"
-        if (
-            ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5))
-            or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5))
-        )
-        else "red"
-    )
+    # Asegurarse que val sea float y manejar NaN
+    if val is None or np.isnan(val):
+        color = "red"
+        display_val = np.nan  # O mostrar 0 o "-"
+    else:
+        display_val = val
+        if ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) or \
+           ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)):
+            color = "green"
+        else:
+            color = "red"
 
     with machine_cols[idx]:
         st.markdown(f"""
         <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
             <h5 style='color:black'>{machine}</h5>
-            <h3 style='color:black'>{val:.1f}%</h3>
+            <h3 style='color:black'>{display_val:.1f if display_val is not np.nan else 0}%</h3>
         </div>
         """, unsafe_allow_html=True)
-
+        
 # --- Tarjetas globales ---
 st.markdown("### 📊 OEE Global por Grupo")
 cols = st.columns(2)
