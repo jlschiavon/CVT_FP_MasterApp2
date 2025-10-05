@@ -219,9 +219,9 @@ st.markdown("### 📊 OEE Global por Grupo")
 cols = st.columns(2)
 
 with cols[0]:
-    color = "green" if oee_global_recken >= target_recken else "red"
+    color = "green" if oee_global_recken < (target_recken - 4) or oee_global_recken > (target_recken + 4) else "red"
     st.markdown(f"""
-    <div style='background-color:#1e1e1e; padding:20px; border-radius:10px; border:3px solid {color}; text-align:center'>
+    <div style='background-color:#c4c4c4; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
         <h4 style='color:white'>Recken Global</h4>
         <h2 style='color:white'>{oee_global_recken:.1f}%</h2>
     </div>
