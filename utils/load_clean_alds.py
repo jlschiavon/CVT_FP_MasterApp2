@@ -67,4 +67,4 @@ def cargar_alds(files_dict):
                 "ALDS Rework": total_rework
             })
 
-    return pd.DataFrame(ALDS)
+    return pd.DataFrame(df)
