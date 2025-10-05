@@ -12,7 +12,6 @@ def cargar_alds(files_dict):
     return None  # Si no se encuentra
 
 def procesar_alds_recken(df):
-    # ====== LIMPIEZA INICIAL ======
     df = df.copy()
     column_map = {
         'Unnamed: 1': 'Station',
@@ -28,39 +27,31 @@ def procesar_alds_recken(df):
     }
     df.rename(columns=column_map, inplace=True)
 
-    # Extraer día, mes, año
     df[['DD','MM','YYYY']] = df['Date'].astype(str).str.split(".", expand=True)
     DAY, MONTH, YEAR = df.loc[0, ['DD','MM','YYYY']]
-    print("DAY:", DAY, "MONTH:", MONTH, "YEAR:", YEAR)
 
-    # Limpiar columnas innecesarias
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
-
-    # Completar nombres de estaciones
     df['Station'] = df['Station'].where(df['Station'].str.startswith("Reckstation", na=False)).ffill()
 
-    # Convertir columnas numéricas
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
-    # Eliminar filas finales vacías si existen
-    df = df.drop([12,13,14,15], axis = 0, inplace = True)
+    df.drop([12,13,14,15], axis = 0, inplace=True, errors='ignore')
 
-    # --- Agrupar por Shift y Parte ---
-    serie_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
-        id_vars='Shift', value_vars=orden_partes,
-        var_name='Parte', value_name='Serie Total'
-    )
+    # --- Nuevo enfoque ---
+    records = []
+    for shift, group in df.groupby('Shift'):
+        for parte in orden_partes:
+            serie_total = group[parte].sum()
+            rework_total = group[parte][group['Rework Parts'] > 0].sum()  # suma solo si hubo rework en esa estación
+            records.append({
+                'Shift': shift,
+                'Parte': parte,
+                'Serie Total': serie_total,
+                'Rework Total': rework_total
+            })
 
-    rework_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
-        id_vars='Shift', value_vars=orden_partes,
-        var_name='Parte', value_name='Rework Total'
-    )
-
-    # Combinar ambos
-    ALDS_Recken = pd.merge(serie_df, rework_df, on=['Shift','Parte'])
-
-    # Ordenar
+    ALDS_Recken = pd.DataFrame(records)
     ALDS_Recken['Shift'] = pd.Categorical(ALDS_Recken['Shift'], categories=shifts, ordered=True)
     ALDS_Recken['Parte'] = pd.Categorical(ALDS_Recken['Parte'], categories=orden_partes, ordered=True)
     ALDS_Recken = ALDS_Recken.sort_values(['Shift','Parte']).reset_index(drop=True)
