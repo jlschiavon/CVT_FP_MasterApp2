@@ -149,7 +149,7 @@ target_vpk = 65
 def color_oee_recken(val):
     if pd.isna(val):
         return ""
-    elif val < (target_recken - 5) and val > (target_recken + 5):
+    elif val < (target_recken - 5) or val > (target_recken + 5):
         return "background-color: lightgreen"
     else: 
         return "background-color: lightcoral" 
@@ -157,7 +157,7 @@ def color_oee_recken(val):
 def color_oee_vpk(val):
     if pd.isna(val):
         return ""
-    elif val < (target_vpk - 5) and val > (target_vpk + 5):
+    elif val < (target_vpk - 5) or val > (target_vpk + 5):
         return "background-color: lightgreen"
     else: 
         return "background-color: lightcoral"
