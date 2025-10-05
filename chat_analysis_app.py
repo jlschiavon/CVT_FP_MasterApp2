@@ -11,6 +11,10 @@ from utils.load_clean_oee import cargar_oee
 from utils.helpers import generar_union_final
 from io import BytesIO
 
+print(os.listdir())
+print(os.listdir("utils"))
+
+
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
 
