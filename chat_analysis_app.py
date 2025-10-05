@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 from datetime import date
 import matplotlib.pyplot as plt
-from utils.load_alds_recken import cargar_alds
+from utils.load_alds_recken import load_alds
 from io import BytesIO
 
 print(os.listdir())
