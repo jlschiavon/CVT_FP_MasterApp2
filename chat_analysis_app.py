@@ -421,8 +421,11 @@ elif st.session_state.section == "Production":
         st.subheader("📊 Preloading Production (Demo)")
         st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
         # Ejemplo de procesamiento:
-        #df_alds = cargar_alds(alds_df)
-        st.dataframe(alds_df, hide_index=True)
+        tabla_final = None
+        if st.sidebar.button("Procesar datos"):
+            df_alds = cargar_alds(alds_df) if alds_df else None
+            tabla_final = pd.merge(tabla_final, df_alds)
+            st.dataframe(tabla_final, hide_index=True)
         # Aquí puedes colocar el procesamiento que ya tenías:
 
 
