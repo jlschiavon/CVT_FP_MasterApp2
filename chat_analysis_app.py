@@ -179,3 +179,55 @@ for machine in df_filtered["Machine"].unique():
 
     # Mostrar la tabla en Streamlit
     st.dataframe(df_styled, hide_index=True, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
+
+st.markdown("---")  # Separador visual
+
+st.header("📈 Promedios de Desempeño")
+
+# --- Promedios de Recken ---
+recken_machines = [m for m in df_filtered["Machine"].unique() if "Recken" in m]
+df_recken = df_filtered[df_filtered["Machine"].isin(recken_machines)]
+
+# Promedio general de todas las Recken
+af_avg = df_recken["AF [%]"].mean()
+pf_avg = df_recken["PF [%]"].mean()
+qf_avg = df_recken["QF [%]"].mean()
+performance_avg = af_avg * pf_avg * qf_avg
+
+st.subheader("✅ Promedio global Recken")
+st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
+
+# Promedio por máquina
+st.subheader("📊 Promedio por máquina Recken")
+cols = st.columns(len(recken_machines))
+for i, machine in enumerate(recken_machines):
+    df_m = df_filtered[df_filtered["Machine"] == machine]
+    af_avg = df_m["AF [%]"].mean()
+    pf_avg = df_m["PF [%]"].mean()
+    qf_avg = df_m["QF [%]"].mean()
+    performance_avg = af_avg * pf_avg * qf_avg
+    cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
+
+# --- Promedios de VPK ---
+vpk_machines = [m for m in df_filtered["Machine"].unique() if "VPK" in m]
+df_vpk = df_filtered[df_filtered["Machine"].isin(vpk_machines)]
+
+# Promedio global de todas las VPK
+af_avg = df_vpk["AF [%]"].mean()
+pf_avg = df_vpk["PF [%]"].mean()
+qf_avg = df_vpk["QF [%]"].mean()
+performance_avg = af_avg * pf_avg * qf_avg
+
+st.subheader("✅ Promedio global VPK")
+st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
+
+# Promedio por máquina
+st.subheader("📊 Promedio por máquina VPK")
+cols = st.columns(len(vpk_machines))
+for i, machine in enumerate(vpk_machines):
+    df_m = df_filtered[df_filtered["Machine"] == machine]
+    af_avg = df_m["AF [%]"].mean()
+    pf_avg = df_m["PF [%]"].mean()
+    qf_avg = df_m["QF [%]"].mean()
+    performance_avg = af_avg * pf_avg * qf_avg
+    cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
