@@ -418,14 +418,14 @@ elif st.session_state.section == "Production":
         st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
     else:
         st.success("✅ Archivos listos para procesar Production")
-
-        # Aquí puedes colocar el procesamiento que ya tenías:
-
         st.subheader("📊 Preloading Production (Demo)")
         st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
-
         # Ejemplo de procesamiento:
         df_alds = cargar_alds(alds_df)
+        st.dataframe(df_alds, hide_index=True)
+        # Aquí puedes colocar el procesamiento que ya tenías:
+
+
         # df_mes = cargar_mes(mes_df)
         # df_oee = cargar_oee(oee_df)
         # tabla_final = generar_union_final(df_alds, df_mes, df_oee)
@@ -434,4 +434,4 @@ elif st.session_state.section == "Production":
 
 
         # PRUEBAS
-        st.dataframe(df_alds, hide_index=True)
+        
