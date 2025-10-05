@@ -6,9 +6,6 @@ import numpy as np
 from datetime import date
 import matplotlib.pyplot as plt
 from utils.load_clean_alds import cargar_alds
-from utils.load_clean_mes import cargar_mes
-from utils.load_clean_oee import cargar_oee
-from utils.helpers import generar_union_final
 from io import BytesIO
 
 print(os.listdir())
