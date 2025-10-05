@@ -103,9 +103,7 @@ elif st.session_state.section == "OEE":
         # Convertir columna DD, MM, YYYY a tipo entero para comparación
         
 # Convertir columnas a enteros de forma segura ..........................................................
-df["DD"] = df["DD"].astype(int)
-df["MM"] = df["MM"].astype(int)
-df["YYYY"] = df["YYYY"].astype(int)
+
 
 # --- Selector de fecha ---
 selected_date = st.date_input(
