@@ -346,15 +346,15 @@ if not df_plot_vpk.empty:
     
     st.pyplot(plt.gcf())
     plt.clf()
-        else:
-        st.warning("No hay datos disponibles para las máquinas VPK")
+else:
+    st.warning("No hay datos disponibles para las máquinas VPK")
 
 
 # ================================
 # --- SECCIÓN PRODUCTION
 # ================================
 elif st.session_state.section == "Production":
-    st.header("📊 Production - Reckens")
+    st.header("📊 Production")
     
     # Buscar archivo Reckens
     recken_file = None
