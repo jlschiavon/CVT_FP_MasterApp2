@@ -5,9 +5,16 @@ def cargar_alds(file):
     orden_partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
     index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
 
-    df = pd.read_csv(file, skiprows=14)
-    df.dropna(how="all", axis=1, inplace=True)
-    df.dropna(how="all", axis=0, inplace=True)
+    df = pd.read_excel(file, skiprows=14)
+    df.drop([0,1,2,3,4,5,6,7,8], axis=0, inplace=True)
+    df.rename(columns={'Unnamed: 5': 'Date'}, inplace=True)
+    df.rename(columns={'Unnamed: 6': 'DD'}, inplace=True)
+    df.rename(columns={'Unnamed: 7': 'MM'}, inplace=True)
+    df.rename(columns={'Unnamed: 8': 'YYYY'}, inplace=True)
+    date_split = df["Date"].astype(str).str.split(".", expand=True)
+    df["DD"] = date_split[0]
+    df["MM"] = date_split[1]
+    df["YYYY"] = date_split[2]
     df = df.loc[:, ~df.columns.str.contains("Unnamed")]
     df["Station"] = df["Station"].where(df["Station"].str.startswith("Reckstation", na=False)).ffill()
 
