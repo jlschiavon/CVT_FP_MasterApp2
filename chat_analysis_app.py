@@ -414,7 +414,7 @@ elif st.session_state.section == "Production":
     st.write(f"OEE: {'✅' if oee_df is not None else '❌'}")
 
     # Si falta algún archivo, advertir y no continuar
-    if not all([alds_df is not None, mes_df is not None, oee_df is not None]):
+    if not any([alds_df is not None, mes_df is not None, oee_df is not None]):
         st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
     else:
         st.success("✅ Archivos listos para procesar Production")
@@ -425,7 +425,7 @@ elif st.session_state.section == "Production":
         st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
 
         # Ejemplo de procesamiento:
-        # df_alds = cargar_alds(alds_df)
+        df_alds = cargar_alds(alds_df)
         # df_mes = cargar_mes(mes_df)
         # df_oee = cargar_oee(oee_df)
         # tabla_final = generar_union_final(df_alds, df_mes, df_oee)
