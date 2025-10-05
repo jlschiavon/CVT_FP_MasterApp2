@@ -184,30 +184,20 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Función para calcular OEE real de acuerdo a la fórmula ---
-def calc_oee_real(df_machine):
+# --- Función para calcular OEE ---
+def calc_oee(df_machine):
     # Filtrar registros donde Shift != "Daily"
     df_shift = df_machine[df_machine["Shift"] != "Daily"]
     if df_shift.empty:
         return None
-
-    # Reemplazar NaN por 0 solo para cálculo
-    prod_min = df_shift["Production min."].fillna(0)
-    planned_min_plan = df_shift["Planned min. (plan. op. time)"].fillna(0)
-    planned_min_prod = df_shift["Planned min. (Prod. qty.)"].fillna(0)
-    yield_qty = df_shift["Yield qty."].fillna(0)
-    prod_qty = df_shift["Prod. qty."].fillna(0)
-
-    # Evitar división por cero usando np.where
-    af = np.where(planned_min_plan != 0, prod_min / planned_min_plan, 0)
-    pf = np.where(prod_min != 0, planned_min_prod / prod_min, 0)
-    qf = np.where(prod_qty != 0, yield_qty / prod_qty, 0)
-
-    # OEE
-    oee_series = af * pf * qf
-
+    # Fórmula OEE: (Production min / Planned min plan op) * (Planned min Prod qty / Production min) * (Yield qty / Prod qty)
+    oee_series = (
+        (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
+        (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
+        (df_shift["Yield qty."] / df_shift["Prod. qty."])
+    )
     # Retornar promedio en porcentaje
-    return np.mean(oee_series) * 100
+    return oee_series.mean() * 100
 
 # --- Agrupar máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
