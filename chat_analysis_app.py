@@ -197,7 +197,7 @@ def calc_oee_real(df_machine):
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
     # Promedio del período en porcentaje
-    return oee_series.mean() * 100
+    return oee_series * 100
 
 # --- Agrupar máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
