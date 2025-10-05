@@ -316,9 +316,9 @@ if not df_plot.empty:
 
     # Colores distintos para cada máquina
     colors = {
-        "Recken 7050 (JATCO)": "#1f77b4",  # azul
-        "Recken 7150 (HYUNDAI)": "#ff7f0e", # naranja
-        "Recken 7250 (GM)": "#2ca02c"       # verde
+        "Recken 7050 (JATCO)": "#004A30",  # azul
+        "Recken 7150 (HYUNDAI)": "#003984", # naranja
+        "Recken 7250 (GM)": "0671D8"       # verde
     }
 
     # Agrupar por máquina
