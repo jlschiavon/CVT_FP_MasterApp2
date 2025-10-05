@@ -184,8 +184,8 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Función para calcular OEE ---
-def calc_oee(df_machine):
+# --- Función para calcular OEE real de acuerdo a la fórmula ---
+def calc_oee_real(df_machine):
     # Filtrar registros donde Shift != "Daily"
     df_shift = df_machine[df_machine["Shift"] != "Daily"]
     if df_shift.empty:
@@ -196,21 +196,21 @@ def calc_oee(df_machine):
         (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
-    # Retornar promedio en porcentaje
+    # Promedio del período en porcentaje
     return oee_series.mean() * 100
 
 # --- Agrupar máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
 vpk_machines = ["VPK 1", "VPK 2"]
 
-# --- Calcular OEE por máquina ---
+# --- Calcular OEE por máquina usando la fórmula real ---
 oee_dict = {}
 for m in recken_machines + vpk_machines:
-    oee_val = calc_oee(df_filtered[df_filtered["Machine"] == m])
+    oee_val = calc_oee_real(df_filtered[df_filtered["Machine"] == m])
     if oee_val is not None:
         oee_dict[m] = oee_val
 
-# --- Calcular OEE global ---
+# --- Calcular OEE global del período por grupo ---
 oee_global_recken = np.mean([oee_dict[m] for m in recken_machines if m in oee_dict])
 oee_global_vpk = np.mean([oee_dict[m] for m in vpk_machines if m in oee_dict])
 
@@ -225,7 +225,6 @@ if len(oee_dict) > 0:
                 or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)))
             else "red"
         )
-
         with machine_cols[idx]:
             st.markdown(f"""
             <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
@@ -257,7 +256,3 @@ with cols[1]:
         <h2 style='color:black'>{oee_global_vpk:.1f}%</h2>
     </div>
     """, unsafe_allow_html=True)
-
-
-
-
