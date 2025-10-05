@@ -364,73 +364,63 @@ elif st.session_state.section == "OEE":
 # ================================
 # --- SECCIÓN PRODUCTION
 # ================================
+# ================================
+# --- SECCIÓN PRODUCTION (RECKEN)
+# ================================
 elif st.session_state.section == "Production":
-    st.header("📊 Production")
+    st.header("📊 Production - Recken")
 
-    st.subheader("📊 Preloading Production")
+    # -------------------------------------------
+    # 1️⃣ DETECCIÓN DE ARCHIVOS RELEVANTES
+    # -------------------------------------------
+    recken_alds_df = None
+    recken_mes_df = None
+    recken_oee_df = None
 
-    # ✅ Verificar si el archivo con la palabra clave "05 - Overview" está cargado
-    if "05 - Overview" in st.session_state.files:
-        st.success("✅ Archivo '05 - Overview' encontrado y listo para procesar")
-
-        # ✅ Procesar ALDS_Recken con cargar_alds
-        try:
-            ALDS_Recken = cargar_alds(st.session_state.files["05 - Overview"])
-            st.write("✅ Resultado de ALDS_Recken:")
-            st.dataframe(ALDS_Recken, use_container_width=True)
-        except Exception as e:
-            st.error(f"❌ Error al procesar ALDS_Recken: {e}")
-
-    else:
-        st.warning("⚠ No se encontró un archivo que contenga '05 - Overview'. Sube uno en la sección de carga.")
-
-
-
-
-
-
-    
-
-    # --- Buscar archivos necesarios desde st.session_state.files ---
-    alds_df = None
-    mes_df = None
-    oee_df = None
-
-    # Buscar por palabras clave registradas en expected_files["Production"]
     for key, df in st.session_state.files.items():
         lower_key = key.lower()
-        if "overview" in lower_key:  # Archivos ALDS o MES
-            if "05" in lower_key or "31" in lower_key:
-                alds_df = df  # ALDS
-            else:
-                mes_df = df  # MES
-        elif "sqlreport" in lower_key or "recken" in lower_key or "oee" in lower_key:
-            oee_df = df  # OEE
 
-        # Mostrar estado
-        st.subheader("📦 Archivos Detectados Automáticamente")
-        st.write(f"ALDS: {'✅' if alds_df is not None else '❌'}")
-        st.write(f"MES: {'✅' if mes_df is not None else '❌'}")
-        st.write(f"OEE: {'✅' if oee_df is not None else '❌'}")
-        
-        # Si falta algún archivo, advertir y no continuar
-        if not any([alds_df is not None, mes_df is not None, oee_df is not None]):
-            st.warning("⚠ Faltan archivos para iniciar el análisis de Production. Vuelve a la sección Cargar Archivos.")
-        else:
-            st.success("✅ Archivos listos para procesar Production")
-            st.subheader("📊 Preloading Production (Demo)")
-            st.write("🔧 Aquí empezamos a procesar con ALDS / MES / OEE...")
-        
-            # ⬇️ BOTÓN EN PANEL CENTRAL
-            if st.button("🚀 Process Production Data - Recken"):
-                try:
-                    df_alds = cargar_alds(alds_df) if alds_df is not None else None
-        
-                    if df_alds is None or df_alds.empty:
-                        st.error("❌ Error: cargar_alds no devolvió datos. Revisa la función.")
-                    else:
-                        st.success("✅ ALDS_Recken generado correctamente")
-                        st.dataframe(df_alds, use_container_width=True)
-        
-                except Exception as e:
-                    st.error(f"❌ Error procesando ALDS_Recken: {e}")
+        # ALDS (Overview archivos tipo 05 o 31)
+        if "overview" in lower_key:
+            if "05" in lower_key:
+                recken_alds_df = df
+
+        # MES (Otros "Overview")
+        elif "correctionQty" in lower_key:
+            recken_mes_df = df
+
+        # OEE (SQLReport o Recken)
+        elif "recken" in lower_key:
+            recken_oee_df = df
+
+    # -------------------------------------------
+    # 2️⃣ VISUALIZAR EL ESTADO DE ARCHIVOS
+    # -------------------------------------------
+    st.subheader("📦 Archivos Detectados Automáticamente (Recken)")
+    st.write(f"ALDS_Recken: {'✅' if recken_alds_df is not None else '❌'}")
+    st.write(f"MES_Recken: {'✅' if recken_mes_df is not None else '❌'}")
+    st.write(f"OEE_Recken: {'✅' if recken_oee_df is not None else '❌'}")
+
+    if not any([recken_alds_df, recken_mes_df, recken_oee_df]):
+        st.warning("⚠ Faltan archivos para iniciar el análisis de Producción Recken. Ve a Cargar Archivos.")
+        st.stop()
+    else:
+        st.success("✅ Archivos listos para procesar Producción Recken")
+
+    # -------------------------------------------
+    # 3️⃣ BOTÓN DE PROCESAMIENTO CENTRAL
+    # -------------------------------------------
+    st.subheader("⚙ Procesamiento Inicial")
+
+    if st.button("🚀 Process Production Data - Recken"):
+        try:
+            recken_alds_clean = cargar_alds({"05 - Overview": recken_alds_df})
+
+            if recken_alds_clean is None or recken_alds_clean.empty:
+                st.error("❌ Error: cargar_alds no devolvió datos válidos para Recken.")
+            else:
+                st.success("✅ ALDS_Recken generado correctamente")
+                st.dataframe(recken_alds_clean, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"❌ Error procesando ALDS_Recken: {e}")
