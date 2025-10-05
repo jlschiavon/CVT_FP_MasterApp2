@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from datetime import date
 import matplotlib.pyplot as plt
-import seaborn as sns  # opcional, para gráficos más atractivos
 
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
@@ -16,8 +15,8 @@ if 'section' not in st.session_state:
 
 # --- Definir archivos esperados ---
 expected_files = {
-    "OEE": {"keywords": ["SQLReport","recken", "vpk"], "format": ["xls", "xlsx", "csv"]},
-    "Production": {"keywords": ["correctionQty", "05 - Overview", "31 - Overview", "EXPORT"], "format": ["xls", "xlsx"]},
+    "OEE": {"keywords": ["sqlreport","recken", "vpk"], "format": ["xls", "xlsx", "csv"]},
+    "Production": {"keywords": ["recken"], "format": ["xls", "xlsx"]},
     "Scrap": {"keywords": ["EXPORT"], "format": ["xls", "xlsx"]},
     "Paros": {"keywords": ["n2", "n3"], "format": ["txt"]},
     "Oil Tracking": {"keywords": ["Tracking Consumo de ATF"], "format": ["xls", "xlsx"]},
@@ -35,7 +34,9 @@ for section_name, info in expected_files.items():
         if st.sidebar.button(section_name):
             st.session_state.section = section_name
 
-# --- Sección de carga de archivos ---
+# ================================
+# --- SECCIÓN DE CARGA DE ARCHIVOS
+# ================================
 if st.session_state.section == "upload":
     st.header("📂 Cargar Archivos CSV/XLS/TXT")
     uploaded_files = st.file_uploader(
@@ -51,6 +52,7 @@ if st.session_state.section == "upload":
             for sect, info in expected_files.items():
                 for kw in info['keywords']:
                     if kw.lower() in file_name:
+                        # Cargar según extensión
                         if file.name.endswith(".csv") or file.name.endswith(".txt"):
                             df = pd.read_csv(file)
                         else:
@@ -72,7 +74,9 @@ if st.session_state.section == "upload":
                 break
         st.write(f"{sect}: {status}")
 
-# --- Sección específica: OEE ---
+# ================================
+# --- SECCIÓN OEE
+# ================================
 elif st.session_state.section == "OEE":
     st.header("📊 Sección: OEE (Procesamiento de SQLReport)")
 
@@ -88,327 +92,85 @@ elif st.session_state.section == "OEE":
     else:
         df = sql_file.copy()
 
-        # 1. Añadir columnas YYYY, MM, DD
-        date_col_index = df.columns.get_loc("Date") + 1
-        df.insert(date_col_index, "YYYY", "")
-        df.insert(date_col_index + 1, "MM", "")
-        df.insert(date_col_index + 2, "DD", "")
+        # --- Procesamiento fechas ---
+        df["Date"] = df["Date"].astype(str)
+        df[["YYYY","MM","DD"]] = df["Date"].str.split("-", expand=True)
+        df.drop(["Date","Unplanned"], axis=1, inplace=True, errors='ignore')
+        for col in ["YYYY","MM","DD"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = df.dropna(subset=["YYYY","MM","DD"])
+        df[["YYYY","MM","DD"]] = df[["YYYY","MM","DD"]].astype(int)
 
-        # 2. Dividir Date
-        date_split = df["Date"].astype(str).str.split("-", expand=True)
-        df["YYYY"] = date_split[0]
-        df["MM"] = date_split[1]
-        df["DD"] = date_split[2]
-        df.drop(["Date","Unplanned"], axis=1, inplace=True)
-        # Convertir columna DD, MM, YYYY a tipo entero para comparación
-        
-# Convertir columnas a enteros de forma segura
-df["DD"] = pd.to_numeric(df["DD"], errors="coerce")
-df["MM"] = pd.to_numeric(df["MM"], errors="coerce")
-df["YYYY"] = pd.to_numeric(df["YYYY"], errors="coerce")
-df = df.dropna(subset=["DD", "MM", "YYYY"])
-df["DD"] = df["DD"].astype(int)
-df["MM"] = df["MM"].astype(int)
-df["YYYY"] = df["YYYY"].astype(int)
+        # Selector de fecha opcional
+        selected_date = st.date_input("Seleccione la fecha para mostrar OEE (opcional)", value=None)
 
-# --- Selector de fecha ---
-selected_date = st.date_input(
-    "Seleccione la fecha para mostrar OEE (opcional)",
-    value=None  # No seleccionar fecha por defecto
-)
-
-# --- Filtrado según selección ---
-if selected_date:
-    # Si el usuario selecciona fecha: mostrar todas las filas de esa fecha, sin filtro Daily
-    day = selected_date.day
-    month = selected_date.month
-    year = selected_date.year
-    df_filtered = df[
-        (df["DD"] == day) &
-        (df["MM"] == month) &
-        (df["YYYY"] == year)
-    ]
-else:
-    # Si no selecciona fecha: mostrar toda la tabla tal como estaba
-    df_filtered=df[df["Shift"]=="Daily"]
-
-
-# 4. Reemplazar nombres de Machine
-machine_map = {
-    "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
-    "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
-    "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
-    "12525645 | Estación de inspección 100% (1)": "VPK 1",
-    "12710703 | Estación de inspección 100% (2)": "VPK 2"
-    }
-        
-df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
-
-# función de colores vs target
-target_recken = 85
-target_vpk = 65
-
-def color_oee_recken(val):
-    if pd.isna(val):
-        return ""
-    elif val < (target_recken - 5) or val > (target_recken + 5):
-        return "background-color: lightcoral"
-    else: 
-        return "background-color: lightgreen" 
-            
-def color_oee_vpk(val):
-    if pd.isna(val):
-        return ""
-    elif val < (target_vpk - 5) or val > (target_vpk + 5):
-        return "background-color: lightcoral"
-    else: 
-        return "background-color: lightgreen"
-
-# --- Mostrar tabla por máquina con colores según target ---
-for machine in df_filtered["Machine"].unique():
-    st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
-
-    # Seleccionar DataFrame de la máquina
-    df_machine = df_filtered[df_filtered["Machine"] == machine]
-
-    # Determinar la función de color según el tipo de máquina
-    if "Recken" in machine:
-        df_styled = df_machine.style.applymap(color_oee_recken, subset=["Act.-OEE [%]"])
-    elif "VPK" in machine:
-        df_styled = df_machine.style.applymap(color_oee_vpk, subset=["Act.-OEE [%]"])
-    else:
-        df_styled = df_machine  # Si es otro tipo de máquina, sin coloreado
-
-    # Mostrar la tabla en Streamlit
-    st.dataframe(df_styled, hide_index=True, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
-
-st.markdown("---")  # Separador visual
-st.header("📈 Promedios de Desempeño")
-
-# --- Función OEE fórmula ---
-def calc_oee_formula(df_machine):
-    df_shift = df_machine[df_machine["Shift"] != "Daily"].copy()
-    if df_shift.empty:
-        return None
-    cols = [
-        "Production min.", "Planned min. (plan. op. time)",
-        "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
-    ]
-    df_shift[cols] = df_shift[cols].fillna(0)
-    oee_series = (
-        (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
-        (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
-        (df_shift["Yield qty."] / df_shift["Prod. qty."])
-    )
-    return oee_series.mean() * 100
-
-# --- Máquinas ---
-recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
-vpk_machines = ["VPK 1", "VPK 2"]
-
-# --- Diccionario de OEE por máquina ---
-oee_dict = {}
-
-if selected_date:  # usuario seleccionó fecha
-    for m in recken_machines + vpk_machines:
-        # Buscar fila Daily de la fecha seleccionada
-        df_daily = df_filtered[
-            (df_filtered["Machine"] == m) &
-            (df_filtered["Shift"] == "Daily") &
-            (df_filtered["DD"] == day) &
-            (df_filtered["MM"] == month) &
-            (df_filtered["YYYY"] == year)
-        ]
-        if not df_daily.empty:
-            oee_dict[m] = df_daily["Act.-OEE [%]"].values[0]
+        if selected_date:
+            day, month, year = selected_date.day, selected_date.month, selected_date.year
+            df_filtered = df[(df["DD"]==day) & (df["MM"]==month) & (df["YYYY"]==year)]
         else:
-            oee_dict[m] = np.nan
-else:  # no hay fecha seleccionada, calcular usando fórmula
-    def calc_oee_formula(df_machine):
-        df_shift = df_machine[df_machine["Shift"] != "Daily"].copy()
-        if df_shift.empty:
-            return np.nan
-        cols = [
-            "Production min.", "Planned min. (plan. op. time)",
-            "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
-        ]
-        df_shift[cols] = df_shift[cols].fillna(0)
-        oee_series = (
-            (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"].replace(0, np.nan)) *
-            (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min"].replace(0, np.nan)) *
-            (df_shift["Yield qty."] / df_shift["Prod. qty."].replace(0, np.nan))
-        )
-        return oee_series.mean() * 100
+            df_filtered = df[df["Shift"]=="Daily"]
 
-    for m in recken_machines + vpk_machines:
-        oee_dict[m] = calc_oee_formula(df_filtered[df_filtered["Machine"] == m])
+        # Reemplazo nombres
+        machine_map = {
+            "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
+            "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
+            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+            "12525645 | Estación de inspección 100% (1)": "VPK 1",
+            "12710703 | Estación de inspección 100% (2)": "VPK 2"
+        }
+        df_filtered["Machine"] = df_filtered["Machine"].replace(machine_map)
 
-# --- Calcular OEE global ---
-def calc_global(oee_list):
-    valid_vals = [v for v in oee_list if not np.isnan(v)]
-    if not valid_vals:
-        return np.nan
-    return np.mean(valid_vals)
+        # Colores vs target
+        target_recken = 85
+        target_vpk = 65
+        def color_oee_recken(val):
+            if pd.isna(val): return ""
+            return "background-color: lightgreen" if target_recken-5 <= val <= target_recken+5 else "background-color: lightcoral"
+        def color_oee_vpk(val):
+            if pd.isna(val): return ""
+            return "background-color: lightgreen" if target_vpk-5 <= val <= target_vpk+5 else "background-color: lightcoral"
 
-oee_global_recken = calc_global([oee_dict[m] for m in recken_machines])
-oee_global_vpk = calc_global([oee_dict[m] for m in vpk_machines])
+        # Mostrar tabla por máquina
+        for machine in df_filtered["Machine"].unique():
+            st.subheader(f"{machine}" + (f" - Fecha: {day:02d}/{month:02d}/{year}" if selected_date else ""))
+            df_machine = df_filtered[df_filtered["Machine"] == machine]
+            if "Recken" in machine:
+                df_styled = df_machine.style.applymap(color_oee_recken, subset=["Act.-OEE [%]"])
+            elif "VPK" in machine:
+                df_styled = df_machine.style.applymap(color_oee_vpk, subset=["Act.-OEE [%]"])
+            else:
+                df_styled = df_machine
+            st.dataframe(df_styled, hide_index=True, column_order=("DD","Shift","Act.-OEE [%]","AF [%]","PF [%]","QF [%]"))
 
-# --- Mostrar tarjetas por máquina ---
-st.markdown("### 🏭 OEE por Máquina")
-machine_cols = st.columns(len(oee_dict))
-for idx, (machine, val) in enumerate(oee_dict.items()):
-    # Definir color de manera segura
-    if val is None or np.isnan(val):
-        color = "red"
-    else:
-        if "Recken" in machine:
-            color = "green" if (target_recken - 5 <= val <= target_recken + 5) else "red"
-        elif "VPK" in machine:
-            color = "green" if (target_vpk - 5 <= val <= target_vpk + 5) else "red"
+        # Gráficas Recken
+        st.header("📊 Gráficas OEE - Recken")
+        recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
+        df_plot = df_filtered[df_filtered["Machine"].isin(recken_machines) & (df_filtered["Shift"]=="Daily")].copy()
+        if not df_plot.empty:
+            plt.figure(figsize=(12,4))
+            colors = {"Recken 7050 (JATCO)":"#004A30","Recken 7150 (HYUNDAI)":"#003984","Recken 7250 (GM)":"#0671D8"}
+            for machine in recken_machines:
+                df_m = df_plot[df_plot["Machine"]==machine]
+                plt.bar(df_m["DD"]+recken_machines.index(machine)*0.2, df_m["Act.-OEE [%]"], width=0.2, color=colors[machine], label=machine, edgecolor='black')
+            plt.axhline(y=target_recken, color='red', linestyle='--', linewidth=2, label=f'Target {target_recken}%')
+            plt.xticks(range(1,32))
+            plt.yticks(range(0,125,5))
+            plt.ylim(0,120)
+            plt.xlabel("Día del mes")
+            plt.ylabel("OEE [%]")
+            plt.title("Evolución diaria de OEE - Máquinas Recken")
+            plt.grid(axis='y', linestyle='--', alpha=0.5)
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=len(recken_machines)+1, fontsize=10)
+            st.pyplot(plt.gcf())
+            plt.clf()
         else:
-            color = "red"
+            st.warning("No hay datos disponibles para las máquinas Recken")
 
-    display_val = 0 if val is None or np.isnan(val) else val
-
-    with machine_cols[idx]:
-        st.markdown(f"""
-        <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
-            <h5 style='color:black'>{machine}</h5>
-            <h3 style='color:black'>{display_val:.1f}%</h3>
-        </div>
-        """, unsafe_allow_html=True)
-
-# --- Tarjetas globales ---
-st.markdown("### 📊 OEE Global por Grupo")
-cols = st.columns(2)
-with cols[0]:
-    color = "green" if not np.isnan(oee_global_recken) and (target_recken - 5 <= oee_global_recken <= target_recken + 5) else "red"
-    display_val = 0 if np.isnan(oee_global_recken) else oee_global_recken
-    st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
-        <h4 style='color:black'>Recken Global</h4>
-        <h2 style='color:black'>{display_val:.1f}%</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-with cols[1]:
-    color = "green" if not np.isnan(oee_global_vpk) and (target_vpk - 5 <= oee_global_vpk <= target_vpk + 5) else "red"
-    display_val = 0 if np.isnan(oee_global_vpk) else oee_global_vpk
-    st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
-        <h4 style='color:black'>VPK Global</h4>
-        <h2 style='color:black'>{display_val:.1f}%</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-#------------- GRÁFICAS
-
-st.markdown("---")  # Separador visual
-st.header("📊 Gráficas de OEE")
-
-
-# Filtrar solo las 3 máquinas Recken y Shift == "Daily"
-recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
-df_plot = df_filtered[
-    (df_filtered["Machine"].isin(recken_machines)) &
-    (df_filtered["Shift"] == "Daily")
-].copy()
-
-if not df_plot.empty:
-    plt.figure(figsize=(12,4))  # menos alto para visual más compacto
-
-    # Colores distintos para cada máquina 
-    colors = { "Recken 7050 (JATCO)": "#004A30", 
-              "Recken 7150 (HYUNDAI)": "#003984",  
-              "Recken 7250 (GM)": "#0671D8"  
-             }
-
-    # Agrupar por máquina
-    for machine in recken_machines:
-        df_machine = df_plot[df_plot["Machine"] == machine]
-        plt.bar(
-            df_machine["DD"] + recken_machines.index(machine)*0.2,  # desplazamiento para evitar superposición
-            df_machine["Act.-OEE [%]"],
-            width=0.2,
-            color=colors[machine],
-            label=machine,
-            edgecolor='black'
-        )
-
-    # Línea del target
-    plt.axhline(y=target_recken, color='red', linestyle='--', linewidth=2, label=f'Target {target_recken}%')
-
-    # Configuración de ejes
-    plt.xticks(range(1,32))  # días del mes
-    plt.yticks(range(0, 125, 5))
-    plt.ylim(0, 120)
-    plt.xlabel("Día del mes")
-    plt.ylabel("OEE [%]")
-    plt.title("Evolución diaria de OEE - Máquinas Recken")
-    plt.grid(axis='y', linestyle='--', alpha=0.5)
-
-    # Leyenda horizontal abajo, más pequeña
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-               ncol=len(recken_machines)+1, fontsize=10)
-
-    st.pyplot(plt.gcf())
-    plt.clf()
-else:
-    st.warning("No hay datos disponibles para las máquinas Recken")
-
-#------------- GRÁFICAS VPK
-vpk_machines = ["VPK 1", "VPK 2"]
-df_plot_vpk = df_filtered[
-    (df_filtered["Machine"].isin(vpk_machines)) &
-    (df_filtered["Shift"] == "Daily")
-].copy()
-
-if not df_plot_vpk.empty:
-    plt.figure(figsize=(12,4))  # menos alto para visual más compacto
-
-    # Colores distintos para cada máquina VPK
-    colors_vpk = {
-        "VPK 1": "#9C27B0",  # morado
-        "VPK 2": "#FF5722"   # naranja rojizo
-    }
-
-    # Agrupar por máquina
-    for machine in vpk_machines:
-        df_machine = df_plot_vpk[df_plot_vpk["Machine"] == machine]
-        plt.bar(
-            df_machine["DD"] + vpk_machines.index(machine)*0.2,  # desplazamiento para evitar superposición
-            df_machine["Act.-OEE [%]"],
-            width=0.2,
-            color=colors_vpk[machine],
-            label=machine,
-            edgecolor='black'
-        )
-
-    # Línea del target
-    plt.axhline(y=target_vpk, color='red', linestyle='--', linewidth=2, label=f'Target {target_vpk}%')
-
-    # Configuración de ejes
-    plt.xticks(range(1,32))  # días del mes
-    plt.yticks(range(0, 125, 5))
-    plt.ylim(0, 120)
-    plt.xlabel("Día del mes")
-    plt.ylabel("OEE [%]")
-    plt.title("Evolución diaria de OEE - Máquinas VPK")
-    plt.grid(axis='y', linestyle='--', alpha=0.5)
-
-    # Leyenda horizontal abajo, más pequeña
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-               ncol=len(vpk_machines)+1, fontsize=10)
-
-    st.pyplot(plt.gcf())
-    plt.clf()
-else:
-    st.warning("No hay datos disponibles para las máquinas VPK")
-
-# --- Sección Production: Reckens ---
+# ================================
+# --- SECCIÓN PRODUCTION
+# ================================
 elif st.session_state.section == "Production":
-    st.header("📊 Production")
-    st.subheader("Recken")
+    st.header("📊 Production - Reckens")
     
     # Buscar archivo Reckens
     recken_file = None
@@ -416,29 +178,20 @@ elif st.session_state.section == "Production":
         if "recken" in key.lower():
             recken_file = st.session_state.files[key]
             break
-    
+
     if recken_file is None:
         st.warning("⚠ No se ha cargado el archivo correspondiente a Reckens aún.")
     else:
-        # Cargar archivo Excel
-        df_recken = pd.read_excel(recken_file)
-    
-        # Convertir columnas necesarias a tipo correcto si aplica
-        # Por ejemplo: Shift, Parte, Production, Yield, etc.
-        # df_recken["Shift"] = df_recken["Shift"].astype(str)
-    
-        # --- Ingreso de chatarra física (igual que antes) ---
+        df_recken = recken_file.copy()
+
+        # --- Ingreso de chatarra física ---
         st.sidebar.header("Ingreso de chatarra física - Reckens")
         turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
         partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
-    
+
         if "scrap_fisico_df" not in st.session_state:
-            st.session_state.scrap_fisico_df = {
-                (shift, parte): 0
-                for shift in turnos
-                for parte in partes
-            }
-    
+            st.session_state.scrap_fisico_df = {(s,p):0 for s in turnos for p in partes}
+
         for turno in turnos:
             st.sidebar.subheader(turno)
             for i, parte in enumerate(partes):
@@ -446,29 +199,18 @@ elif st.session_state.section == "Production":
                 st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
                     f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
                 )
-    
-        # Botón para procesar datos
+
         if st.sidebar.button("Procesar Reckens"):
-            # Aquí podrías cargar MES y ALDS si se cargaron
-            # df_alds = cargar_alds(alds_file) if alds_file else None
-            # df_mes = cargar_mes(mes_file) if mes_file else None
-    
-            # Agregar columna "Físico" desde el scrap ingresado
-            scrap_fisico_df_series = pd.Series({
-                (shift, parte): cantidad
-                for (shift, parte), cantidad in st.session_state.scrap_fisico_df.items()
-            })
+            scrap_fisico_df_series = pd.Series({(s,p):v for (s,p),v in st.session_state.scrap_fisico_df.items()})
             scrap_fisico_df = scrap_fisico_df_series.reset_index()
-            scrap_fisico_df.columns = ["Shift", "Parte", "Fisico"]
-    
-            df_recken_final = pd.merge(df_recken, scrap_fisico_df, on=["Shift", "Parte"], how="left")
-    
-            # Orden personalizado de partes
+            scrap_fisico_df.columns = ["Shift","Parte","Fisico"]
+
+            df_recken_final = pd.merge(df_recken, scrap_fisico_df, on=["Shift","Parte"], how="left")
             df_recken_final["Parte"] = pd.Categorical(df_recken_final["Parte"], categories=partes, ordered=True)
-            df_recken_final = df_recken_final.sort_values(by=["Shift", "Parte"])
-    
+            df_recken_final = df_recken_final.sort_values(by=["Shift","Parte"])
+
             st.dataframe(df_recken_final, use_container_width=True)
-    
+
             # Exportar Excel
             output_path = "recken_final.xlsx"
             df_recken_final.to_excel(output_path, index=False)
