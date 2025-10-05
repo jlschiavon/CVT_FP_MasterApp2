@@ -28,8 +28,6 @@ def procesar_alds_recken(df):
     df.rename(columns=column_map, inplace=True)
 
     df[['DD','MM','YYYY']] = df['Date'].astype(str).str.split(".", expand=True)
-    DAY, MONTH, YEAR = df.loc[0, ['DD','MM','YYYY']]
-
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
     df['Station'] = df['Station'].where(df['Station'].str.startswith("Reckstation", na=False)).ffill()
 
@@ -38,12 +36,12 @@ def procesar_alds_recken(df):
 
     df.drop([12,13,14,15], axis = 0, inplace=True, errors='ignore')
 
-    # --- Nuevo enfoque ---
+    # ===== Sumar Serie y Rework por Shift y Parte =====
     records = []
     for shift, group in df.groupby('Shift'):
         for parte in orden_partes:
             serie_total = group[parte].sum()
-            rework_total = group[parte][group['Rework Parts'] > 0].sum()  # suma solo si hubo rework en esa estación
+            rework_total = group[parte].where(group['Rework Parts']>0, 0).sum()  # suma solo rework >0
             records.append({
                 'Shift': shift,
                 'Parte': parte,
