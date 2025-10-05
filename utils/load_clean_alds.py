@@ -36,23 +36,27 @@ def procesar_alds_recken(df):
 
     df.drop([12,13,14,15], axis = 0, inplace=True, errors='ignore')
 
-    # ===== Sumar Serie y Rework por Shift y Parte =====
-    records = []
-    for shift, group in df.groupby('Shift'):
+    # ===== Sumar Serie y Rework por Shift y Parte usando tu lógica =====
+    # Crear índice completo para reindexar después
+    import itertools
+    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
+
+    ALDS = []
+    for shift in shifts:
+        df_shift = df[df["Shift"] == shift]
         for parte in orden_partes:
-            serie_total = group[parte].sum()
-            rework_total = group[parte].where(group['Rework Parts']>0, 0).sum()  # suma solo rework >0
-            records.append({
-                'Shift': shift,
-                'Parte': parte,
-                'Serie Total': serie_total,
-                'Rework Total': rework_total
+            if parte not in df.columns:
+                continue
+            filtro = df_shift[parte] != 0
+            total_serie = df_shift.loc[filtro, "Serie Parts"].sum() if filtro.any() else 0
+            total_rework = df_shift.loc[filtro, "Rework Parts"].sum() if filtro.any() else 0
+            ALDS.append({
+                "Shift": shift,
+                "Parte": parte,
+                "Serie Total": total_serie,
+                "Rework Total": total_rework
             })
 
-    ALDS_Recken = pd.DataFrame(records)
-    ALDS_Recken['Shift'] = pd.Categorical(ALDS_Recken['Shift'], categories=shifts, ordered=True)
-    ALDS_Recken['Parte'] = pd.Categorical(ALDS_Recken['Parte'], categories=orden_partes, ordered=True)
-    ALDS_Recken = ALDS_Recken.sort_values(['Shift','Parte']).reset_index(drop=True)
-
+    ALDS_Recken = pd.DataFrame(ALDS).set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
     return ALDS_Recken
 
