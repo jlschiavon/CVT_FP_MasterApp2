@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import date
+import matplotlib.pyplot as plt
+import seaborn as sns  # opcional, para gráficos más atractivos
 
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
