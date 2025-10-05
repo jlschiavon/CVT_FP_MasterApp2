@@ -404,6 +404,6 @@ elif st.session_state.section == "Production":
         
         # --- Carga de archivos ---
         st.sidebar.header("Carga de archivos")
-        alds_file = st.sidebar.file_uploader("Archivo ALDS (.csv)", type="csv")
-        mes_file = st.sidebar.file_uploader("Archivo MES (.xls)", type=["xls"])
-        oee_file = st.sidebar.file_uploader("Archivo OEE (.csv)", type="csv")
+        alds_file = st.sidebar.file_uploader("Archivo ALDS (.xlsx)", type="xlsx")
+        mes_file = st.sidebar.file_uploader("Archivo MES (.xlsx)", type=["xlsx"])
+        oee_file = st.sidebar.file_uploader("Archivo OEE (.xlsx)", type="xlsx")
