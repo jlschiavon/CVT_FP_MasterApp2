@@ -222,14 +222,27 @@ if selected_date:  # usuario seleccionó fecha
         else:
             oee_dict[m] = np.nan
 else:  # no hay fecha seleccionada, calcular usando fórmula
-    for m in recken_machines + vpk_machines:
-        oee_val = calc_oee_formula(df_filtered[df_filtered["Machine"] == m])
-        oee_dict[m] = oee_val
+    def calc_oee_formula(df_machine):
+        df_shift = df_machine[df_machine["Shift"] != "Daily"].copy()
+        if df_shift.empty:
+            return np.nan
+        cols = [
+            "Production min.", "Planned min. (plan. op. time)",
+            "Planned min. (Prod. qty.)", "Yield qty.", "Prod. qty."
+        ]
+        df_shift[cols] = df_shift[cols].fillna(0)
+        oee_series = (
+            (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"].replace(0, np.nan)) *
+            (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min"].replace(0, np.nan)) *
+            (df_shift["Yield qty."] / df_shift["Prod. qty."].replace(0, np.nan))
+        )
+        return oee_series.mean() * 100
 
-# --- Calcular OEE global por grupo ---
+    for m in recken_machines + vpk_machines:
+        oee_dict[m] = calc_oee_formula(df_filtered[df_filtered["Machine"] == m])
+
+# --- Calcular OEE global ---
 def calc_global(oee_list):
-    # Convertir todos los valores a float, no numéricos pasan a NaN
-    oee_list = pd.to_numeric(oee_list, errors="coerce")
     valid_vals = [v for v in oee_list if not np.isnan(v)]
     if not valid_vals:
         return np.nan
@@ -241,23 +254,19 @@ oee_global_vpk = calc_global([oee_dict[m] for m in vpk_machines])
 # --- Mostrar tarjetas por máquina ---
 st.markdown("### 🏭 OEE por Máquina")
 machine_cols = st.columns(len(oee_dict))
-
 for idx, (machine, val) in enumerate(oee_dict.items()):
-    # Determinar color según target y tipo de máquina
-    color = (
-        "green"
-        if (
-            ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5))
-            or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5))
-        )
-        else "red"
-    )
-
-    # Manejar valores NaN
+    # Definir color de manera segura
     if val is None or np.isnan(val):
-        display_val = 0  # Puedes poner "-" si prefieres
+        color = "red"
     else:
-        display_val = val
+        if "Recken" in machine:
+            color = "green" if (target_recken - 5 <= val <= target_recken + 5) else "red"
+        elif "VPK" in machine:
+            color = "green" if (target_vpk - 5 <= val <= target_vpk + 5) else "red"
+        else:
+            color = "red"
+
+    display_val = 0 if val is None or np.isnan(val) else val
 
     with machine_cols[idx]:
         st.markdown(f"""
@@ -267,39 +276,25 @@ for idx, (machine, val) in enumerate(oee_dict.items()):
         </div>
         """, unsafe_allow_html=True)
 
-
-# --- Tarjetas OEE global ---
+# --- Tarjetas globales ---
 st.markdown("### 📊 OEE Global por Grupo")
 cols = st.columns(2)
-
-# Recken
-if oee_global_recken is None or np.isnan(oee_global_recken):
-    global_recken_display = 0
-else:
-    global_recken_display = oee_global_recken
-
-color_recken = "green" if (target_recken - 5 <= global_recken_display <= target_recken + 5) else "red"
-
 with cols[0]:
+    color = "green" if not np.isnan(oee_global_recken) and (target_recken - 5 <= oee_global_recken <= target_recken + 5) else "red"
+    display_val = 0 if np.isnan(oee_global_recken) else oee_global_recken
     st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color_recken}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
         <h4 style='color:black'>Recken Global</h4>
-        <h2 style='color:black'>{global_recken_display:.1f}%</h2>
+        <h2 style='color:black'>{display_val:.1f}%</h2>
     </div>
-    """ , unsafe_allow_html=True)
-
-# VPK
-if oee_global_vpk is None or np.isnan(oee_global_vpk):
-    global_vpk_display = 0
-else:
-    global_vpk_display = oee_global_vpk
-
-color_vpk = "green" if (target_vpk - 5 <= global_vpk_display <= target_vpk + 5) else "red"
+    """, unsafe_allow_html=True)
 
 with cols[1]:
+    color = "green" if not np.isnan(oee_global_vpk) and (target_vpk - 5 <= oee_global_vpk <= target_vpk + 5) else "red"
+    display_val = 0 if np.isnan(oee_global_vpk) else oee_global_vpk
     st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color_vpk}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
         <h4 style='color:black'>VPK Global</h4>
-        <h2 style='color:black'>{global_vpk_display:.1f}%</h2>
+        <h2 style='color:black'>{display_val:.1f}%</h2>
     </div>
-    """ , unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
