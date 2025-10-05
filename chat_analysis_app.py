@@ -184,8 +184,8 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Función para calcular OEE real de acuerdo a la fórmula ---
-def calc_oee_real(df_machine):
+# --- Función para calcular OEE ---
+def calc_oee(df_machine):
     # Filtrar registros donde Shift != "Daily"
     df_shift = df_machine[df_machine["Shift"] != "Daily"]
     if df_shift.empty:
@@ -196,8 +196,8 @@ def calc_oee_real(df_machine):
         (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
-    # Promedio del período en porcentaje
-    return oee_series
+    # Retornar promedio en porcentaje
+    return oee_series.mean() * 100
 
 # --- Agrupar máquinas ---
 recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
@@ -220,12 +220,11 @@ if len(oee_dict) > 0:
     machine_cols = st.columns(len(oee_dict))
     for idx, (machine, val) in enumerate(oee_dict.items()):
         color = (
-            "green" 
+            "green"
             if (("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) 
-                or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)) )
+                or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)))
             else "red"
         )
-
         with machine_cols[idx]:
             st.markdown(f"""
             <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
