@@ -150,17 +150,17 @@ def color_oee_recken(val):
     if pd.isna(val):
         return ""
     elif val < (target_recken - 5) or val > (target_recken + 5):
-        return "background-color: lightgreen"
+        return "background-color: lightcoral"
     else: 
-        return "background-color: lightcoral" 
+        return "background-color: lightgreen" 
             
 def color_oee_vpk(val):
     if pd.isna(val):
         return ""
     elif val < (target_vpk - 5) or val > (target_vpk + 5):
-        return "background-color: lightgreen"
-    else: 
         return "background-color: lightcoral"
+    else: 
+        return "background-color: lightgreen"
 
 # --- Mostrar tabla por máquina con colores según target ---
 for machine in df_filtered["Machine"].unique():
