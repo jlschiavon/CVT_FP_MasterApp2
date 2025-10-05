@@ -430,3 +430,8 @@ elif st.session_state.section == "Production":
         # df_oee = cargar_oee(oee_df)
         # tabla_final = generar_union_final(df_alds, df_mes, df_oee)
         # st.dataframe(tabla_final)
+
+
+
+        # PRUEBAS
+        print(df_alds.head(10))
