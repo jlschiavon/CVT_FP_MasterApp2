@@ -228,6 +228,8 @@ else:  # no hay fecha seleccionada, calcular usando fórmula
 
 # --- Calcular OEE global por grupo ---
 def calc_global(oee_list):
+    # Convertir todos los valores a float, no numéricos pasan a NaN
+    oee_list = pd.to_numeric(oee_list, errors="coerce")
     valid_vals = [v for v in oee_list if not np.isnan(v)]
     if not valid_vals:
         return np.nan
