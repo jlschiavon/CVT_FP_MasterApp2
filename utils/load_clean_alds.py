@@ -51,7 +51,7 @@ def procesar_alds_recken(df):
     # Agrupar por Shift y sumar partes
     ALDS_Recken = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
         id_vars='Shift', value_vars=orden_partes,
-        var_name='Parte', value_name='Total'
+        var_name='Parte', value_name='ALDS Serie + Total'
     )
 
     # Orden correcto de Shift y Parte
