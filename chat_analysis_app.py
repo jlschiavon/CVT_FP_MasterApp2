@@ -346,8 +346,8 @@ if not df_plot_vpk.empty:
     
     st.pyplot(plt.gcf())
     plt.clf()
-    else:
-    st.warning("No hay datos disponibles para las máquinas VPK")
+        else:
+        st.warning("No hay datos disponibles para las máquinas VPK")
 
 
 # ================================
