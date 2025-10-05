@@ -184,51 +184,68 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Promedios de Recken ---
-recken_machines = [m for m in df_filtered["Machine"].unique() if "Recken" in m]
-df_recken = df_filtered[df_filtered["Machine"].isin(recken_machines)]
-st.dataframe(df_recken)
+# --- Función para calcular OEE ---
+def calc_oee(df_machine):
+    # Filtrar registros donde Shift != "Daily"
+    df_shift = df_machine[df_machine["Shift"] != "Daily"]
+    if df_shift.empty:
+        return None
+    # Fórmula OEE: (Production min / Planned min plan op) * (Planned min Prod qty / Production min) * (Yield qty / Prod qty)
+    oee_series = (
+        (df_shift["Production min."] / df_shift["Planned min. (plan. op. time)"]) *
+        (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
+        (df_shift["Yield qty."] / df_shift["Prod. qty."])
+    )
+    # Retornar promedio en porcentaje
+    return oee_series.mean() * 100
 
-# Promedio general de todas las Recken
-af_avg = df_recken["AF [%]"].mean()
-pf_avg = df_recken["PF [%]"].mean()
-qf_avg = df_recken["QF [%]"].mean()
-performance_avg = af_avg * pf_avg * qf_avg / 10000
+# --- Agrupar máquinas ---
+recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
+vpk_machines = ["VPK 1", "VPK 2"]
 
-st.subheader("✅ Promedio global Recken")
-st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
+# --- Calcular OEE por máquina ---
+oee_dict = {}
+for m in recken_machines + vpk_machines:
+    oee_val = calc_oee(df_filtered[df_filtered["Machine"] == m])
+    if oee_val is not None:
+        oee_dict[m] = oee_val
 
-# Promedio por máquina
-st.subheader("📊 Promedio por máquina Recken")
-cols = st.columns(len(recken_machines))
-for i, machine in enumerate(recken_machines):
-    df_m = df_filtered[df_filtered["Machine"] == machine]
-    af_avg = df_m["AF [%]"].mean()
-    pf_avg = df_m["PF [%]"].mean()
-    qf_avg = df_m["QF [%]"].mean()
-    performance_avg = af_avg * pf_avg * qf_avg / 10000
-    cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
+# --- Calcular OEE global ---
+oee_global_recken = np.mean([oee_dict[m] for m in recken_machines if m in oee_dict])
+oee_global_vpk = np.mean([oee_dict[m] for m in vpk_machines if m in oee_dict])
 
-# --- Promedios de VPK ---
-vpk_machines = [m for m in df_filtered["Machine"].unique() if "VPK" in m]
-df_vpk = df_filtered[df_filtered["Machine"].isin(vpk_machines)]
+# --- Mostrar tarjetas ---
+st.markdown("### 📊 OEE Global por Grupo")
+cols = st.columns(2)
 
-# Promedio global de todas las VPK
-af_avg = df_vpk["AF [%]"].mean()
-pf_avg = df_vpk["PF [%]"].mean()
-qf_avg = df_vpk["QF [%]"].mean()
-performance_avg = af_avg * pf_avg * qf_avg / 10000
+with cols[0]:
+    color = "green" if oee_global_recken >= target_recken else "red"
+    st.markdown(f"""
+    <div style='background-color:#1e1e1e; padding:20px; border-radius:10px; border:3px solid {color}; text-align:center'>
+        <h4 style='color:white'>Recken Global</h4>
+        <h2 style='color:white'>{oee_global_recken:.1f}%</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.subheader("✅ Promedio global VPK")
-st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
+with cols[1]:
+    color = "green" if oee_global_vpk >= target_vpk else "red"
+    st.markdown(f"""
+    <div style='background-color:#1e1e1e; padding:20px; border-radius:10px; border:3px solid {color}; text-align:center'>
+        <h4 style='color:white'>VPK Global</h4>
+        <h2 style='color:white'>{oee_global_vpk:.1f}%</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Promedio por máquina
-st.subheader("📊 Promedio por máquina VPK")
-cols = st.columns(len(vpk_machines))
-for i, machine in enumerate(vpk_machines):
-    df_m = df_filtered[df_filtered["Machine"] == machine]
-    af_avg = df_m["AF [%]"].mean()
-    pf_avg = df_m["PF [%]"].mean()
-    qf_avg = df_m["QF [%]"].mean()
-    performance_avg = af_avg * pf_avg * qf_avg / 10000
-    cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
+# --- Mostrar OEE por máquina ---
+st.markdown("### 🏭 OEE por Máquina")
+machine_cols = st.columns(len(oee_dict))
+for idx, (machine, val) in enumerate(oee_dict.items()):
+    color = "green" if ("Recken" in machine and val >= target_recken) or ("VPK" in machine and val >= target_vpk) else "red"
+    with machine_cols[idx]:
+        st.markdown(f"""
+        <div style='background-color:#1e1e1e; padding:15px; border-radius:10px; border:3px solid {color}; text-align:center'>
+            <h5 style='color:white'>{machine}</h5>
+            <h3 style='color:white'>{val:.1f}%</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
