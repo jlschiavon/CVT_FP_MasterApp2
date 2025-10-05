@@ -192,7 +192,7 @@ df_recken = df_filtered[df_filtered["Machine"].isin(recken_machines)]
 af_avg = df_recken["AF [%]"].mean()
 pf_avg = df_recken["PF [%]"].mean()
 qf_avg = df_recken["QF [%]"].mean()
-performance_avg = af_avg * pf_avg * qf_avg
+performance_avg = af_avg * pf_avg * qf_avg / 10000
 
 st.subheader("✅ Promedio global Recken")
 st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
@@ -205,7 +205,7 @@ for i, machine in enumerate(recken_machines):
     af_avg = df_m["AF [%]"].mean()
     pf_avg = df_m["PF [%]"].mean()
     qf_avg = df_m["QF [%]"].mean()
-    performance_avg = af_avg * pf_avg * qf_avg
+    performance_avg = af_avg * pf_avg * qf_avg / 10000
     cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
 
 # --- Promedios de VPK ---
@@ -216,7 +216,7 @@ df_vpk = df_filtered[df_filtered["Machine"].isin(vpk_machines)]
 af_avg = df_vpk["AF [%]"].mean()
 pf_avg = df_vpk["PF [%]"].mean()
 qf_avg = df_vpk["QF [%]"].mean()
-performance_avg = af_avg * pf_avg * qf_avg
+performance_avg = af_avg * pf_avg * qf_avg / 10000
 
 st.subheader("✅ Promedio global VPK")
 st.metric(label="Desempeño Promedio (AF*PF*QF)", value=f"{performance_avg:.2f}%")
@@ -229,5 +229,5 @@ for i, machine in enumerate(vpk_machines):
     af_avg = df_m["AF [%]"].mean()
     pf_avg = df_m["PF [%]"].mean()
     qf_avg = df_m["QF [%]"].mean()
-    performance_avg = af_avg * pf_avg * qf_avg
+    performance_avg = af_avg * pf_avg * qf_avg / 10000
     cols[i].metric(label=f"{machine}", value=f"{performance_avg:.2f}%")
