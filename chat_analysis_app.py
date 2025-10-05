@@ -302,32 +302,22 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
-import matplotlib.pyplot as plt
+# Filtrar solo la máquina Recken 7050
+df_plot = df_filtered[
+    (df_filtered["Machine"] == "Recken 7050 (JATCO)") &
+    (df_filtered["Shift"] != "Daily")
+].copy()
 
-# --- Preparar DataFrame para gráficas ---
-df_plot = df_filtered[df_filtered["Shift"] != "Daily"].copy()
-
-# Máquinas a graficar
-all_machines = recken_machines + vpk_machines
-
-# --- Graficar ---
-st.markdown("### 📈 Evolución OEE Act.-[%] por Máquina")
-
-plt.figure(figsize=(14,7))
-for m in all_machines:
-    df_m = df_plot[df_plot["Machine"] == m]
-    if df_m.empty:
-        continue
-    y_values = df_m["Act.-OEE [%]"].fillna(0)
-    plt.plot(df_m["DD"], y_values, marker='o', label=m)
-
-plt.xticks(sorted(df_plot["DD"].unique()))
-plt.ylim(0, 120)
-plt.ylabel("OEE [%]")
-plt.xlabel("Día del mes")
-plt.title("Evolución diaria del OEE por Máquina")
-plt.grid(True, linestyle='--', alpha=0.5)
-plt.legend()
-plt.tight_layout()
-st.pyplot(plt.gcf())
-plt.clf()
+if not df_plot.empty:
+    plt.figure(figsize=(10,6))
+    plt.plot(df_plot["DD"], df_plot["Act.-OEE [%]"], marker='o', linestyle='-', color='blue')
+    plt.xticks(sorted(df_plot["DD"].unique()))
+    plt.ylim(0, 120)
+    plt.xlabel("Día del mes")
+    plt.ylabel("OEE [%]")
+    plt.title("Evolución diaria de OEE - Recken 7050 (JATCO)")
+    plt.grid(True, linestyle='--', alpha=0.5)
+    st.pyplot(plt.gcf())
+    plt.clf()
+else:
+    st.warning("No hay datos disponibles para Recken 7050 (JATCO)")
