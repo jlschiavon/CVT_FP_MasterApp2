@@ -298,3 +298,7 @@ with cols[1]:
         <h2 style='color:black'>{display_val:.1f}%</h2>
     </div>
     """, unsafe_allow_html=True)
+
+#------------- GRÁFICAS
+dias = df_filtered["DD"]
+df_Recken7150 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)")
