@@ -184,8 +184,8 @@ st.markdown("---")  # Separador visual
 
 st.header("📈 Promedios de Desempeño")
 
-# --- Función para calcular OEE ---
-def calc_oee(df_machine):
+# --- Función para calcular OEE real de acuerdo a la fórmula ---
+def calc_oee_real(df_machine):
     # Filtrar registros donde Shift != "Daily"
     df_shift = df_machine[df_machine["Shift"] != "Daily"]
     if df_shift.empty:
@@ -196,7 +196,7 @@ def calc_oee(df_machine):
         (df_shift["Planned min. (Prod. qty.)"] / df_shift["Production min."]) *
         (df_shift["Yield qty."] / df_shift["Prod. qty."])
     )
-    # Retornar promedio en porcentaje
+    # Promedio del período en porcentaje
     return oee_series.mean() * 100
 
 # --- Agrupar máquinas ---
