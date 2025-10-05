@@ -221,7 +221,7 @@ cols = st.columns(2)
 with cols[0]:
     color = "green" if oee_global_recken < (target_recken - 4) or oee_global_recken > (target_recken + 4) else "red"
     st.markdown(f"""
-    <div style='background-color:#c4c4c4; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
         <h4 style='color:white'>Recken Global</h4>
         <h2 style='color:white'>{oee_global_recken:.1f}%</h2>
     </div>
@@ -230,7 +230,7 @@ with cols[0]:
 with cols[1]:
     color = "green" if oee_global_vpk >= target_vpk else "red"
     st.markdown(f"""
-    <div style='background-color:#1e1e1e; padding:20px; border-radius:10px; border:3px solid {color}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
         <h4 style='color:white'>VPK Global</h4>
         <h2 style='color:white'>{oee_global_vpk:.1f}%</h2>
     </div>
@@ -243,7 +243,7 @@ for idx, (machine, val) in enumerate(oee_dict.items()):
     color = "green" if ("Recken" in machine and val >= target_recken) or ("VPK" in machine and val >= target_vpk) else "red"
     with machine_cols[idx]:
         st.markdown(f"""
-        <div style='background-color:#1e1e1e; padding:15px; border-radius:10px; border:3px solid {color}; text-align:center'>
+        <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
             <h5 style='color:white'>{machine}</h5>
             <h3 style='color:white'>{val:.1f}%</h3>
         </div>
