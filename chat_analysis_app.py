@@ -304,37 +304,48 @@ with cols[1]:
 #------------- GRÁFICAS
 import matplotlib.pyplot as plt
 
-# Filtrar solo la máquina Recken 7050
+# Filtrar solo las 3 máquinas Recken y Shift == "Daily"
+recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
 df_plot = df_filtered[
-    (df_filtered["Machine"] == "Recken 7050 (JATCO)") &
+    (df_filtered["Machine"].isin(recken_machines)) &
     (df_filtered["Shift"] == "Daily")
 ].copy()
 
 if not df_plot.empty:
-    target = target_recken  # target de Recken
-    plt.figure(figsize=(10,6))
+    plt.figure(figsize=(12,6))
 
-    # Colorear barras según si están dentro o fuera del target ±5%
-    colors = [
-        'lightgreen' if target-5 <= val <= target+5 else 'lightcoral' 
-        for val in df_plot["Act.-OEE [%]"]
-    ]
+    # Colores distintos para cada máquina
+    colors = {
+        "Recken 7050 (JATCO)": "#1f77b4",  # azul
+        "Recken 7150 (HYUNDAI)": "#ff7f0e", # naranja
+        "Recken 7250 (GM)": "#2ca02c"       # verde
+    }
 
-    plt.bar(df_plot["DD"], df_plot["Act.-OEE [%]"], color=colors, edgecolor='black')
+    # Agrupar por máquina
+    for machine in recken_machines:
+        df_machine = df_plot[df_plot["Machine"] == machine]
+        plt.bar(
+            df_machine["DD"] + recken_machines.index(machine)*0.2,  # desplazamiento para evitar superposición
+            df_machine["Act.-OEE [%]"],
+            width=0.2,
+            color=colors[machine],
+            label=machine,
+            edgecolor='black'
+        )
 
     # Línea del target
-    plt.axhline(y=target, color='blue', linestyle='--', linewidth=2, label=f'Target {target}%')
+    plt.axhline(y=target_recken, color='blue', linestyle='--', linewidth=2, label=f'Target {target_recken}%')
 
     # Configuración de ejes
-    plt.xticks(sorted(df_plot["DD"].unique()))
+    plt.xticks(range(1,32))  # días del mes
     plt.yticks(range(0, 125, 5))
     plt.ylim(0, 120)
     plt.xlabel("Día del mes")
     plt.ylabel("OEE [%]")
-    plt.title("Evolución diaria de OEE - Recken 7050 (JATCO)")
+    plt.title("Evolución diaria de OEE - Máquinas Recken")
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.legend()
     st.pyplot(plt.gcf())
     plt.clf()
 else:
-    st.warning("No hay datos disponibles para Recken 7050 (JATCO)")
+    st.warning("No hay datos disponibles para las máquinas Recken")
