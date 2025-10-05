@@ -314,12 +314,11 @@ df_plot = df_filtered[
 if not df_plot.empty:
     plt.figure(figsize=(12,4))  # menos alto para visual más compacto
 
-    # Colores distintos para cada máquina, más suaves
-    colors = {
-        "Recken 7050 (JATCO)": "#4CAF50",  # verde
-        "Recken 7150 (HYUNDAI)": "#FF9800", # naranja
-        "Recken 7250 (GM)": "#2196F3"       # azul
-    }
+    # Colores distintos para cada máquina 
+    colors = { "Recken 7050 (JATCO)": "#004A30", 
+              "Recken 7150 (HYUNDAI)": "#003984",  
+              "Recken 7250 (GM)": "#0671D8"  
+             }
 
     # Agrupar por máquina
     for machine in recken_machines:
