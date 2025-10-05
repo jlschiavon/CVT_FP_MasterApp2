@@ -48,16 +48,24 @@ def procesar_alds_recken(df):
     # Eliminar filas finales vacías si existen
     df = df.iloc[:-6, :]
 
-    # Agrupar por Shift y sumar partes
-    ALDS_Recken = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
+    # --- Agrupar por Shift y Parte ---
+    serie_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
         id_vars='Shift', value_vars=orden_partes,
-        var_name='Parte', value_name='ALDS Serie + Total'
+        var_name='Parte', value_name='Serie Total'
     )
 
-    # Orden correcto de Shift y Parte
+    rework_df = df.groupby('Shift')[orden_partes].sum().reset_index().melt(
+        id_vars='Shift', value_vars=orden_partes,
+        var_name='Parte', value_name='Rework Total'
+    )
+
+    # Combinar ambos
+    ALDS_Recken = pd.merge(serie_df, rework_df, on=['Shift','Parte'])
+
+    # Ordenar
     ALDS_Recken['Shift'] = pd.Categorical(ALDS_Recken['Shift'], categories=shifts, ordered=True)
     ALDS_Recken['Parte'] = pd.Categorical(ALDS_Recken['Parte'], categories=orden_partes, ordered=True)
     ALDS_Recken = ALDS_Recken.sort_values(['Shift','Parte']).reset_index(drop=True)
-    ALDS_Recken.drop([12,13,14,15], axis=0, inplace=True)  # Eliminar filas no deseadas
     
-    return pd.DataFrame(ALDS_Recken)
+    return ALDS_Recken
+
