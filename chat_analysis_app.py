@@ -1,8 +1,15 @@
 import streamlit as st
 import pandas as pd
+import os
+from datetime import datetime
 import numpy as np
 from datetime import date
 import matplotlib.pyplot as plt
+from utils.load_clean_alds import cargar_alds
+from utils.load_clean_mes import cargar_mes
+from utils.load_clean_oee import cargar_oee
+from utils.helpers import generar_union_final
+from io import BytesIO
 
 # Configuración de la página
 st.set_page_config(page_title="CVT Final Processes", layout="wide")
@@ -354,49 +361,6 @@ elif st.session_state.section == "OEE":
 # ================================
 elif st.session_state.section == "Production":
     st.header("📊 Production")
-    
-    # Buscar archivo Reckens
-    recken_file = None
-    for key in st.session_state.files:
-        if "recken" in key.lower():
-            recken_file = st.session_state.files[key]
-            break
 
-    if recken_file is None:
-        st.warning("⚠ No se ha cargado el archivo correspondiente a Reckens aún.")
-    else:
-        df_recken = recken_file.copy()
-
-        # --- Ingreso de chatarra física ---
-        st.sidebar.header("Ingreso de chatarra física - Reckens")
-        turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
-        partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
-
-        if "scrap_fisico_df" not in st.session_state:
-            st.session_state.scrap_fisico_df = {(s,p):0 for s in turnos for p in partes}
-
-        for turno in turnos:
-            st.sidebar.subheader(turno)
-            for i, parte in enumerate(partes):
-                orden_key = f"{i:02d}_{turno}_{parte}"
-                st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
-                    f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
-                )
-
-        if st.sidebar.button("Procesar Reckens"):
-            scrap_fisico_df_series = pd.Series({(s,p):v for (s,p),v in st.session_state.scrap_fisico_df.items()})
-            scrap_fisico_df = scrap_fisico_df_series.reset_index()
-            scrap_fisico_df.columns = ["Shift","Parte","Fisico"]
-
-            df_recken_final = pd.merge(df_recken, scrap_fisico_df, on=["Shift","Parte"], how="left")
-            df_recken_final["Parte"] = pd.Categorical(df_recken_final["Parte"], categories=partes, ordered=True)
-            df_recken_final = df_recken_final.sort_values(by=["Shift","Parte"])
-
-            st.dataframe(df_recken_final, use_container_width=True)
-
-            # Exportar Excel
-            output_path = "recken_final.xlsx"
-            df_recken_final.to_excel(output_path, index=False)
-            with open(output_path, "rb") as f:
-                st.download_button("Descargar Excel - Reckens", f, file_name="recken_final.xlsx")
+ 
 
