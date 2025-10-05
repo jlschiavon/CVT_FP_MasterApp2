@@ -312,13 +312,13 @@ df_plot = df_filtered[
 ].copy()
 
 if not df_plot.empty:
-    plt.figure(figsize=(12,6))
+    plt.figure(figsize=(12,4))  # menos alto para visual más compacto
 
-    # Colores distintos para cada máquina
+    # Colores distintos para cada máquina, más suaves
     colors = {
-        "Recken 7050 (JATCO)": "#004A30",  # azul
-        "Recken 7150 (HYUNDAI)": "#003984", # naranja
-        "Recken 7250 (GM)": "#0671D8"       # verde
+        "Recken 7050 (JATCO)": "#4CAF50",  # verde
+        "Recken 7150 (HYUNDAI)": "#FF9800", # naranja
+        "Recken 7250 (GM)": "#2196F3"       # azul
     }
 
     # Agrupar por máquina
@@ -334,7 +334,7 @@ if not df_plot.empty:
         )
 
     # Línea del target
-    plt.axhline(y=target_recken, color='blue', linestyle='--', linewidth=2, label=f'Target {target_recken}%')
+    plt.axhline(y=target_recken, color='red', linestyle='--', linewidth=2, label=f'Target {target_recken}%')
 
     # Configuración de ejes
     plt.xticks(range(1,32))  # días del mes
@@ -344,8 +344,13 @@ if not df_plot.empty:
     plt.ylabel("OEE [%]")
     plt.title("Evolución diaria de OEE - Máquinas Recken")
     plt.grid(axis='y', linestyle='--', alpha=0.5)
-    plt.legend()
+
+    # Leyenda horizontal abajo, más pequeña
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
+               ncol=len(recken_machines)+1, fontsize=10)
+
     st.pyplot(plt.gcf())
     plt.clf()
 else:
     st.warning("No hay datos disponibles para las máquinas Recken")
+
