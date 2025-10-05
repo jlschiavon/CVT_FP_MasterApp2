@@ -302,12 +302,10 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
-# --- Preparar DataFrame para gráficas ---
-# Filtrar solo registros que no sean "Daily"
-df_plot = df_filtered[df_filtered["Shift"] != "Daily"].copy()
+import matplotlib.pyplot as plt
 
-# Crear columna datetime
-df_plot["Date_dt"] = pd.to_datetime(df_plot[["YYYY","MM","DD"]])
+# --- Preparar DataFrame para gráficas ---
+df_plot = df_filtered[df_filtered["Shift"] != "Daily"].copy()
 
 # Máquinas a graficar
 all_machines = recken_machines + vpk_machines
@@ -320,17 +318,13 @@ for m in all_machines:
     df_m = df_plot[df_plot["Machine"] == m]
     if df_m.empty:
         continue
-    # Reemplazar NaN por 0 para graficar
     y_values = df_m["Act.-OEE [%]"].fillna(0)
-    plt.plot(df_m["Date_dt"], y_values, marker='o', label=m)
+    plt.plot(df_m["DD"], y_values, marker='o', label=m)
 
-# Configurar formato de fechas en eje x
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-plt.xticks(rotation=45)
+plt.xticks(sorted(df_plot["DD"].unique()))
 plt.ylim(0, 120)
 plt.ylabel("OEE [%]")
-plt.xlabel("Fecha")
+plt.xlabel("Día del mes")
 plt.title("Evolución diaria del OEE por Máquina")
 plt.grid(True, linestyle='--', alpha=0.5)
 plt.legend()
