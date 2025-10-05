@@ -401,5 +401,9 @@ elif st.session_state.section == "Production":
                 st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
                     f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
                 )
-
         
+        # --- Carga de archivos ---
+        st.sidebar.header("Carga de archivos")
+        alds_file = st.sidebar.file_uploader("Archivo ALDS (.csv)", type="csv")
+        mes_file = st.sidebar.file_uploader("Archivo MES (.xls)", type=["xls"])
+        oee_file = st.sidebar.file_uploader("Archivo OEE (.csv)", type="csv")
