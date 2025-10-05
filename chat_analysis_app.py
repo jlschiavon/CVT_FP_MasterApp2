@@ -305,7 +305,7 @@ with cols[1]:
 # Filtrar solo la máquina Recken 7050
 df_plot = df_filtered[
     (df_filtered["Machine"] == "Recken 7050 (JATCO)") &
-    (df_filtered["Shift"] != "Daily")
+    (df_filtered["Shift"] == "Daily")
 ].copy()
 
 if not df_plot.empty:
