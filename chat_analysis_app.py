@@ -26,8 +26,8 @@ if 'section' not in st.session_state:
 
 # --- Definir archivos esperados ---
 expected_files = {
-    "OEE": {"keywords": ["sqlreport","recken", "vpk"], "format": ["xls", "xlsx", "csv"]},
-    "Production": {"keywords": ["recken"], "format": ["xls", "xlsx"]},
+    "OEE": {"keywords": ["SQLReport"], "format": ["xlsx"]},
+    "Production": {"keywords": ["05 - Overview", "31 - Overview", "correctionQty", "recken", "vpk"], "format": ["xlsx", "xlsx", "csv"]},
     "Scrap": {"keywords": ["EXPORT"], "format": ["xls", "xlsx"]},
     "Paros": {"keywords": ["n2", "n3"], "format": ["txt"]},
     "Oil Tracking": {"keywords": ["Tracking Consumo de ATF"], "format": ["xls", "xlsx"]},
