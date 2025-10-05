@@ -187,6 +187,7 @@ st.header("📈 Promedios de Desempeño")
 # --- Promedios de Recken ---
 recken_machines = [m for m in df_filtered["Machine"].unique() if "Recken" in m]
 df_recken = df_filtered[df_filtered["Machine"].isin(recken_machines)]
+st.dataframe(df_recken)
 
 # Promedio general de todas las Recken
 af_avg = df_recken["AF [%]"].mean()
