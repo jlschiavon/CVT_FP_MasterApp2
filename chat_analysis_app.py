@@ -302,21 +302,38 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
+import matplotlib.pyplot as plt
+
 # Filtrar solo la máquina Recken 7050
 df_plot = df_filtered[
     (df_filtered["Machine"] == "Recken 7050 (JATCO)") &
-    (df_filtered["Shift"] == "Daily")
+    (df_filtered["Shift"] != "Daily")
 ].copy()
 
 if not df_plot.empty:
+    target = target_recken  # target de Recken
     plt.figure(figsize=(10,6))
-    plt.plot(df_plot["DD"], df_plot["Act.-OEE [%]"], marker='o', linestyle='-', color='blue')
+
+    # Colorear barras según si están dentro o fuera del target ±5%
+    colors = [
+        'lightgreen' if target-5 <= val <= target+5 else 'lightcoral' 
+        for val in df_plot["Act.-OEE [%]"]
+    ]
+
+    plt.bar(df_plot["DD"], df_plot["Act.-OEE [%]"], color=colors, edgecolor='black')
+
+    # Línea del target
+    plt.axhline(y=target, color='blue', linestyle='--', linewidth=2, label=f'Target {target}%')
+
+    # Configuración de ejes
     plt.xticks(sorted(df_plot["DD"].unique()))
+    plt.yticks(range(0, 125, 5))
     plt.ylim(0, 120)
     plt.xlabel("Día del mes")
     plt.ylabel("OEE [%]")
     plt.title("Evolución diaria de OEE - Recken 7050 (JATCO)")
-    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
+    plt.legend()
     st.pyplot(plt.gcf())
     plt.clf()
 else:
