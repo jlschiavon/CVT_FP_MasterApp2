@@ -407,70 +407,70 @@ else:
 
 # --- Sección Production: Reckens ---
 elif st.session_state.section == "Production":
-st.header("📊 Production")
-st.subheader("Recken")
-
-# Buscar archivo Reckens
-recken_file = None
-for key in st.session_state.files:
-    if "recken" in key.lower():
-        recken_file = st.session_state.files[key]
-        break
-
-if recken_file is None:
-    st.warning("⚠ No se ha cargado el archivo correspondiente a Reckens aún.")
-else:
-    # Cargar archivo Excel
-    df_recken = pd.read_excel(recken_file)
-
-    # Convertir columnas necesarias a tipo correcto si aplica
-    # Por ejemplo: Shift, Parte, Production, Yield, etc.
-    # df_recken["Shift"] = df_recken["Shift"].astype(str)
-
-    # --- Ingreso de chatarra física (igual que antes) ---
-    st.sidebar.header("Ingreso de chatarra física - Reckens")
-    turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
-    partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
-
-    if "scrap_fisico_df" not in st.session_state:
-        st.session_state.scrap_fisico_df = {
-            (shift, parte): 0
-            for shift in turnos
-            for parte in partes
-        }
-
-    for turno in turnos:
-        st.sidebar.subheader(turno)
-        for i, parte in enumerate(partes):
-            orden_key = f"{i:02d}_{turno}_{parte}"
-            st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
-                f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
-            )
-
-    # Botón para procesar datos
-    if st.sidebar.button("Procesar Reckens"):
-        # Aquí podrías cargar MES y ALDS si se cargaron
-        # df_alds = cargar_alds(alds_file) if alds_file else None
-        # df_mes = cargar_mes(mes_file) if mes_file else None
-
-        # Agregar columna "Físico" desde el scrap ingresado
-        scrap_fisico_df_series = pd.Series({
-            (shift, parte): cantidad
-            for (shift, parte), cantidad in st.session_state.scrap_fisico_df.items()
-        })
-        scrap_fisico_df = scrap_fisico_df_series.reset_index()
-        scrap_fisico_df.columns = ["Shift", "Parte", "Fisico"]
-
-        df_recken_final = pd.merge(df_recken, scrap_fisico_df, on=["Shift", "Parte"], how="left")
-
-        # Orden personalizado de partes
-        df_recken_final["Parte"] = pd.Categorical(df_recken_final["Parte"], categories=partes, ordered=True)
-        df_recken_final = df_recken_final.sort_values(by=["Shift", "Parte"])
-
-        st.dataframe(df_recken_final, use_container_width=True)
-
-        # Exportar Excel
-        output_path = "recken_final.xlsx"
-        df_recken_final.to_excel(output_path, index=False)
-        with open(output_path, "rb") as f:
-            st.download_button("Descargar Excel - Reckens", f, file_name="recken_final.xlsx")
+    st.header("📊 Production")
+    st.subheader("Recken")
+    
+    # Buscar archivo Reckens
+    recken_file = None
+    for key in st.session_state.files:
+        if "recken" in key.lower():
+            recken_file = st.session_state.files[key]
+            break
+    
+    if recken_file is None:
+        st.warning("⚠ No se ha cargado el archivo correspondiente a Reckens aún.")
+    else:
+        # Cargar archivo Excel
+        df_recken = pd.read_excel(recken_file)
+    
+        # Convertir columnas necesarias a tipo correcto si aplica
+        # Por ejemplo: Shift, Parte, Production, Yield, etc.
+        # df_recken["Shift"] = df_recken["Shift"].astype(str)
+    
+        # --- Ingreso de chatarra física (igual que antes) ---
+        st.sidebar.header("Ingreso de chatarra física - Reckens")
+        turnos = ["1st Shift", "2nd Shift", "3rd Shift"]
+        partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
+    
+        if "scrap_fisico_df" not in st.session_state:
+            st.session_state.scrap_fisico_df = {
+                (shift, parte): 0
+                for shift in turnos
+                for parte in partes
+            }
+    
+        for turno in turnos:
+            st.sidebar.subheader(turno)
+            for i, parte in enumerate(partes):
+                orden_key = f"{i:02d}_{turno}_{parte}"
+                st.session_state.scrap_fisico_df[(turno, parte)] = st.sidebar.number_input(
+                    f"{parte}", min_value=0, step=1, key=orden_key, value=st.session_state.scrap_fisico_df[(turno, parte)]
+                )
+    
+        # Botón para procesar datos
+        if st.sidebar.button("Procesar Reckens"):
+            # Aquí podrías cargar MES y ALDS si se cargaron
+            # df_alds = cargar_alds(alds_file) if alds_file else None
+            # df_mes = cargar_mes(mes_file) if mes_file else None
+    
+            # Agregar columna "Físico" desde el scrap ingresado
+            scrap_fisico_df_series = pd.Series({
+                (shift, parte): cantidad
+                for (shift, parte), cantidad in st.session_state.scrap_fisico_df.items()
+            })
+            scrap_fisico_df = scrap_fisico_df_series.reset_index()
+            scrap_fisico_df.columns = ["Shift", "Parte", "Fisico"]
+    
+            df_recken_final = pd.merge(df_recken, scrap_fisico_df, on=["Shift", "Parte"], how="left")
+    
+            # Orden personalizado de partes
+            df_recken_final["Parte"] = pd.Categorical(df_recken_final["Parte"], categories=partes, ordered=True)
+            df_recken_final = df_recken_final.sort_values(by=["Shift", "Parte"])
+    
+            st.dataframe(df_recken_final, use_container_width=True)
+    
+            # Exportar Excel
+            output_path = "recken_final.xlsx"
+            df_recken_final.to_excel(output_path, index=False)
+            with open(output_path, "rb") as f:
+                st.download_button("Descargar Excel - Reckens", f, file_name="recken_final.xlsx")
