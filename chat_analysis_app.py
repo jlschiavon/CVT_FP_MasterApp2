@@ -302,21 +302,50 @@ with cols[1]:
     """, unsafe_allow_html=True)
 
 #------------- GRÁFICAS
-dias = df_filtered["DD"]
-df_Recken7050 = df_filtered.groupby('Machine').get_group('Recken 7050 (JATCO)')
-oee_recken7050 = df_Recken7050["Act.-OEE [%]"]
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+# --- Preparar datos para la gráfica ---
+machines = list(oee_dict.keys())
+oee_values = [0 if np.isnan(v) else v for v in oee_dict.values()]
+colors = []
+
+for m, v in zip(machines, oee_values):
+    if "Recken" in m:
+        colors.append("green" if target_recken - 5 <= v <= target_recken + 5 else "red")
+    elif "VPK" in m:
+        colors.append("green" if target_vpk - 5 <= v <= target_vpk + 5 else "red")
+    else:
+        colors.append("gray")
+
+# --- Graficar OEE por máquina ---
+st.markdown("### 📊 Gráfica OEE por Máquina")
 plt.figure(figsize=(10,6))
+sns.barplot(x=machines, y=oee_values, palette=colors)
+plt.ylim(0, 120)
+plt.ylabel("OEE [%]")
+plt.xlabel("Máquina")
+plt.title("OEE por Máquina")
+for i, v in enumerate(oee_values):
+    plt.text(i, v + 1, f"{v:.1f}%", ha='center', fontweight='bold')
+st.pyplot(plt.gcf())
+plt.clf()
 
-plt.plot(dias, oee_recken7050, marker='o', linestyle='-', color='b', label='Recken 7050 (JATCO)')
+# --- Graficar OEE global por grupo ---
+st.markdown("### 📊 Gráfica OEE Global por Grupo")
+groups = ["Recken Global", "VPK Global"]
+global_values = [oee_global_recken, oee_global_vpk]
+group_colors = [
+    "green" if target_recken - 5 <= oee_global_recken <= target_recken + 5 else "red",
+    "green" if target_vpk - 5 <= oee_global_vpk <= target_vpk + 5 else "red"
+]
 
-plt.axhline(85, color='red', linestyle='--', label='Target 85%')
-
-plt.title("OEE por Máquina y Día", fontsize=16)
-plt.xlabel("Día", fontsize=14)
-plt.ylabel("OEE [%]", fontsize=14)
-plt.grid(True)
-plt.legend()
-plt.xticks(rotation=45)
-
-plt.show()
+plt.figure(figsize=(6,6))
+sns.barplot(x=groups, y=global_values, palette=group_colors)
+plt.ylim(0, 120)
+plt.ylabel("OEE [%]")
+for i, v in enumerate(global_values):
+    display_val = 0 if np.isnan(v) else v
+    plt.text(i, display_val + 1, f"{display_val:.1f}%", ha='center', fontweight='bold')
+st.pyplot(plt.gcf())
+plt.clf()
