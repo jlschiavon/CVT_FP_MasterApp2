@@ -409,4 +409,15 @@ elif st.session_state.section == "Production":
     # -------------------------------------------
     st.subheader("⚙ Procesamiento Inicial")
 
+    if st.button("🚀 Process Production Data - Recken"):
+        try:
+            recken_alds_clean = cargar_alds({"05 - Overview": recken_alds_df})
 
+            if recken_alds_clean is None or recken_alds_clean.empty:
+                st.error("❌ Error: cargar_alds no devolvió datos válidos para Recken.")
+            else:
+                st.success("✅ ALDS_Recken generado correctamente")
+                st.dataframe(recken_alds_clean, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"❌ Error procesando ALDS_Recken: {e}")
