@@ -241,44 +241,65 @@ oee_global_vpk = calc_global([oee_dict[m] for m in vpk_machines])
 # --- Mostrar tarjetas por máquina ---
 st.markdown("### 🏭 OEE por Máquina")
 machine_cols = st.columns(len(oee_dict))
+
 for idx, (machine, val) in enumerate(oee_dict.items()):
-    # Asegurarse que val sea float y manejar NaN
+    # Determinar color según target y tipo de máquina
+    color = (
+        "green"
+        if (
+            ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5))
+            or ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5))
+        )
+        else "red"
+    )
+
+    # Manejar valores NaN
     if val is None or np.isnan(val):
-        color = "red"
-        display_val = np.nan  # O mostrar 0 o "-"
+        display_val = 0  # Puedes poner "-" si prefieres
     else:
         display_val = val
-        if ("Recken" in machine and (target_recken - 5 <= val <= target_recken + 5)) or \
-           ("VPK" in machine and (target_vpk - 5 <= val <= target_vpk + 5)):
-            color = "green"
-        else:
-            color = "red"
 
     with machine_cols[idx]:
         st.markdown(f"""
         <div style='background-color:#f7f5f5; padding:15px; border-radius:10px; border:8px solid {color}; text-align:center'>
             <h5 style='color:black'>{machine}</h5>
-            <h3 style='color:black'>{display_val:.1f if display_val is not np.nan else 0}%</h3>
+            <h3 style='color:black'>{display_val:.1f}%</h3>
         </div>
         """, unsafe_allow_html=True)
-        
-# --- Tarjetas globales ---
+
+
+# --- Tarjetas OEE global ---
 st.markdown("### 📊 OEE Global por Grupo")
 cols = st.columns(2)
+
+# Recken
+if oee_global_recken is None or np.isnan(oee_global_recken):
+    global_recken_display = 0
+else:
+    global_recken_display = oee_global_recken
+
+color_recken = "green" if (target_recken - 5 <= global_recken_display <= target_recken + 5) else "red"
+
 with cols[0]:
-    color = "green" if (target_recken - 5 <= oee_global_recken <= target_recken + 5) else "red"
     st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color_recken}; text-align:center'>
         <h4 style='color:black'>Recken Global</h4>
-        <h2 style='color:black'>{oee_global_recken:.1f}%</h2>
+        <h2 style='color:black'>{global_recken_display:.1f}%</h2>
     </div>
-    """, unsafe_allow_html=True)
+    """ , unsafe_allow_html=True)
+
+# VPK
+if oee_global_vpk is None or np.isnan(oee_global_vpk):
+    global_vpk_display = 0
+else:
+    global_vpk_display = oee_global_vpk
+
+color_vpk = "green" if (target_vpk - 5 <= global_vpk_display <= target_vpk + 5) else "red"
 
 with cols[1]:
-    color = "green" if (target_vpk - 5 <= oee_global_vpk <= target_vpk + 5) else "red"
     st.markdown(f"""
-    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color}; text-align:center'>
+    <div style='background-color:#f7f5f5; padding:20px; border-radius:10px; border:8px solid {color_vpk}; text-align:center'>
         <h4 style='color:black'>VPK Global</h4>
-        <h2 style='color:black'>{oee_global_vpk:.1f}%</h2>
+        <h2 style='color:black'>{global_vpk_display:.1f}%</h2>
     </div>
-    """, unsafe_allow_html=True)
+    """ , unsafe_allow_html=True)
