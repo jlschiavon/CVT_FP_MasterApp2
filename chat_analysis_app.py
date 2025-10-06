@@ -401,106 +401,26 @@ elif st.session_state.section == "Production":
     st.write(f"MES_Recken: {'✅' if recken_mes_df is not None else '❌'}")
     st.write(f"OEE_Recken: {'✅' if recken_oee_df is not None else '❌'}")
 
-import pandas as pd
-import streamlit as st
-from datetime import date
+    # ------------------------------
+    # CONTROLES DE FILTRADO
+    # ------------------------------
+    st.subheader("📅 Segmentación de análisis")
+    
+    # Valor por defecto: hoy
+    default_start = date.today()
+    default_end = date.today()
+    
+    fecha_rango = st.date_input(
+        "Selecciona un rango de fechas",
+        value=(default_start, default_end)
+    )
+    
+    turno_seleccionado = st.radio(
+        "Filtrar por turno",
+        ["Todos", "1st Shift", "2nd Shift", "3rd Shift"],
+        horizontal=True
+    )
 
-# ------------------------------
-# CONTROLES DE FILTRADO
-# ------------------------------
-st.subheader("📅 Segmentación de análisis")
-
-# Valor por defecto: hoy
-default_start = date.today()
-default_end = date.today()
-
-fecha_rango = st.date_input(
-    "Selecciona un rango de fechas",
-    value=(default_start, default_end)
-)
-
-turno_seleccionado = st.radio(
-    "Filtrar por turno",
-    ["Todos", "1st Shift", "2nd Shift", "3rd Shift"],
-    horizontal=True
-)
-
-# ------------------------------
-# PROCESAMIENTO ALDS
-# ------------------------------
-if recken_alds_df is not None:
-    recken_alds_clean, fecha_alds = cargar_alds({
-        "05 - Overview (Parts worked in stations per shift)": recken_alds_df
-    })
-else:
-    recken_alds_clean, fecha_alds = None, None
-    st.warning("⚠ No se detectó archivo ALDS para Recken. ALDS no se mostrará.")
-
-# Reconstruir fecha del ALDS
-if recken_alds_clean is not None and not recken_alds_clean.empty:
-    DD = str(recken_alds_clean.loc[0, 'DD']).zfill(2)
-    MM = str(recken_alds_clean.loc[0, 'MM']).zfill(2)
-    YYYY = str(recken_alds_clean.loc[0, 'YYYY'])
-    fecha_alds = pd.to_datetime(f"{YYYY}-{MM}-{DD}", format="%Y-%m-%d")
-else:
-    fecha_alds = None
-
-# ------------------------------
-# PROCESAMIENTO MES
-# ------------------------------
-df_mes = cargar_mes(recken_mes_df)
-
-# Filtrado por rango de fechas
-if fecha_rango and fecha_rango[0] and fecha_rango[1]:
-    df_mes_filtrado = df_mes[
-        (df_mes["Tiempo actual"].dt.date >= fecha_rango[0]) &
-        (df_mes["Tiempo actual"].dt.date <= fecha_rango[1])
-    ]
-else:
-    df_mes_filtrado = df_mes.copy()
-
-# Filtrado por turno
-if turno_seleccionado != "Todos":
-    if turno_seleccionado == "1st Shift":
-        df_mes_filtrado = df_mes_filtrado[
-            (df_mes_filtrado["Tiempo actual"].dt.hour >= 7) &
-            (df_mes_filtrado["Tiempo actual"].dt.hour < 15)
-        ]
-    elif turno_seleccionado == "2nd Shift":
-        df_mes_filtrado = df_mes_filtrado[
-            ((df_mes_filtrado["Tiempo actual"].dt.hour >= 15) & (df_mes_filtrado["Tiempo actual"].dt.hour < 22)) |
-            ((df_mes_filtrado["Tiempo actual"].dt.hour == 22) & (df_mes_filtrado["Tiempo actual"].dt.minute <= 30))
-        ]
-    elif turno_seleccionado == "3rd Shift":
-        df_mes_filtrado = df_mes_filtrado[
-            ((df_mes_filtrado["Tiempo actual"].dt.hour >= 22) & (df_mes_filtrado["Tiempo actual"].dt.minute >= 30)) |
-            (df_mes_filtrado["Tiempo actual"].dt.hour < 7)
-        ]
-
-# ------------------------------
-# FILTRAR ALDS SEGÚN FECHA Y TURNO
-# ------------------------------
-mostrar_alds = False
-if fecha_alds is not None:
-    # Mostrar si la fecha del ALDS está dentro del rango seleccionado
-    if fecha_rango[0] <= fecha_alds.date() <= fecha_rango[1]:
-        mostrar_alds = True
-
-# Filtrar ALDS por turno si se seleccionó uno específico
-if mostrar_alds and turno_seleccionado != "Todos":
-    recken_alds_clean = recken_alds_clean[recken_alds_clean["Shift"] == turno_seleccionado]
-
-# ------------------------------
-# MOSTRAR RESULTADOS
-# ------------------------------
-st.subheader("📊 MES Recken")
-st.dataframe(df_mes_filtrado, use_container_width=True)
-
-if mostrar_alds:
-    st.subheader("📊 ALDS Recken")
-    st.dataframe(recken_alds_clean, use_container_width=True)
-else:
-    st.info("⛔ ALDS fuera del rango de fechas seleccionado, no se mostrará.")
 
 
     # -------------------------------------------
