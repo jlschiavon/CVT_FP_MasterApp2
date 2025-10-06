@@ -11,9 +11,8 @@ def cargar_alds(files_dict):
             return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
-df_original = df.copy()
-
 def procesar_alds_recken(df):
+    df_original = df.copy()
     df = df.copy()
     
     column_map = {
