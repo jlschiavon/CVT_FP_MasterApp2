@@ -34,7 +34,7 @@ def procesar_alds_recken(df):
     DAY, MONTH, YEAR = df.loc[0, ['DD','MM','YYYY']]
     print("DAY:", DAY, "MONTH:", MONTH, "YEAR:", YEAR)
     
-    df.drop(index=[0,1,2,3,4,29,30,31,32,33,34], inplace=True)  # Elimina la fila de encabezado original
+    df.drop(index=[0,1,2,3,4], inplace=True)  # Elimina la fila de encabezado original
     
     # Limpiar columnas innecesarias
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
