@@ -8,7 +8,7 @@ def cargar_alds(files_dict):
     # Buscar el archivo que contenga '05 - overview' dentro de las keys del diccionario
     for key, df in files_dict.items():
         if "05 - overview" in key.lower():
-            return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
+            return df  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
 df = df.copy()
