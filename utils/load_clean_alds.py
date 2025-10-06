@@ -12,7 +12,7 @@ def cargar_alds(files_dict):
             MM = str(df.loc[0, 'Date'].month)
             YYYY = str(df.loc[0, 'Date'].year)
             fecha_alds = pd.to_datetime(f"{YYYY}-{MM}-{DD}", format="%Y-%m-%d")
-            return procesar_alds_recken(df), fecha_alds  # ✅ Procesar solo ese dataframe
+            return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
 def procesar_alds_recken(df):
