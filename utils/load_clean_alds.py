@@ -28,33 +28,45 @@ def procesar_alds_recken(df):
         'Unnamed: 5': 'Date'
     }
     df.rename(columns=column_map, inplace=True)
-
+    
+    # Extraer día, mes, año
     df[['DD','MM','YYYY']] = df['Date'].astype(str).str.split(".", expand=True)
+    DAY, MONTH, YEAR = df.loc[0, ['DD','MM','YYYY']]
+    print("DAY:", DAY, "MONTH:", MONTH, "YEAR:", YEAR)
+    
+    df.drop(index=[0,1,2,3,4,29,30,31,32,33,34], inplace=True)  # Elimina la fila de encabezado original
+    
+    # Limpiar columnas innecesarias
     df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")] + ['Date','DD','MM','YYYY'], inplace=True, errors='ignore')
-    
+        
+    # Completar nombres de estaciones
     df['Station'] = df['Station'].where(df['Station'].str.startswith("Reckstation", na=False)).ffill()
-    
+        
+    # Convertir columnas numéricas
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+        
+    # ====== CÁLCULO DE TOTALES ======
     
-    df.drop([12,13,14,15], axis=0, inplace=True, errors='ignore')
-
-    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
-
-    ALDS = []
+    resultados = []
+    
     for shift in shifts:
-        df_shift = df[df["Shift"] == shift]
-        for parte in orden_partes:
-            if parte not in df.columns:
-                continue
-            total_serie = df_shift[parte].sum()           # suma todos los valores de esa parte
-            total_rework = df_shift["Rework Parts"].sum() # suma todas las filas de Rework Parts
-            ALDS.append({
+        for part in orden_partes:
+            val = df.loc[(df['Shift'] == shift) & (df["Serie Parts"] > 0), part].sum()
+    
+            if val > 0:
+                total_series = df.loc[(df['Shift'] == shift) & (df[part] > 0), 'Serie Parts'].sum()
+                total_rework = val - total_series
+            else:
+                total_series = 0
+                total_rework = 0
+    
+            resultados.append({
                 "Shift": shift,
-                "Parte": parte,
-                "Serie Total": total_serie,
-                "Rework Total": total_rework
+                "Part Number": part,
+                "ALDS Serie Parts Total": total_series,
+                "ALDS Rework Parts Total": total_rework
             })
-
-    ALDS_Recken = pd.DataFrame(ALDS).set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
+    
+    ALDS_Recken = pd.DataFrame(resultados)
     return ALDS_Recken
