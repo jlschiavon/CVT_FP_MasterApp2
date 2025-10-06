@@ -407,15 +407,13 @@ elif st.session_state.section == "Production":
     else:
         st.success("✅ Archivos listos para procesar Producción Recken")
 
+    if recken_mes_df is None:
+    st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
     # -------------------------------------------
     # 3️⃣ BOTÓN DE PROCESAMIENTO CENTRAL
     # -------------------------------------------
     st.subheader("⚙ Procesamiento Inicial")
     tabla_recken = []
-
-    if recken_mes_df is None:
-    st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
-
     
     if st.button("🚀 Process Production Data - Recken"):
         try:
