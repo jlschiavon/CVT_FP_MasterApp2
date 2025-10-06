@@ -12,7 +12,7 @@ def cargar_alds(files_dict):
     return None  # Si no se encuentra
 
 def procesar_alds_recken(df):
-    df_original = df.copy()
+    #df_original = df.copy()
     df = df.copy()
     
     column_map = {
@@ -45,6 +45,7 @@ def procesar_alds_recken(df):
     # Convertir columnas numéricas
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+        df_tratado = df.copy()
         
     # ====== CÁLCULO DE TOTALES ======
     
@@ -69,4 +70,4 @@ def procesar_alds_recken(df):
             })
     
     ALDS_Recken = pd.DataFrame(resultados)
-    return df_original
+    return df_tratado
