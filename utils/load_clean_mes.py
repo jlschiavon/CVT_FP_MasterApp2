@@ -7,7 +7,22 @@ def cargar_mes(file):
     partes_full = [parte + "    Chain CVT" for parte in orden_partes]
     index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
 
-    dfMES = pd.read_excel(file)
+    # ✅ Nuevo: aceptar diccionario como cargar_alds
+    if isinstance(file, dict):
+        for key, df in file.items():
+            if "correction" in key.lower() or "mes" in key.lower():
+                file = df  # reemplazar file con el DataFrame correcto
+                break
+
+    # ✅ Si es ruta de archivo (str), leer normalmente
+    if isinstance(file, str):
+        dfMES = pd.read_excel(file)
+    # ✅ Si ya es un DataFrame, usarlo directo
+    elif isinstance(file, pd.DataFrame):
+        dfMES = file
+    else:
+        raise ValueError(f"❌ Tipo de entrada no válido para cargar_mes: {type(file)}")
+
     dfMES["Tiempo actual"] = pd.to_datetime(dfMES["Tiempo actual"], format="%d.%m.%Y %H:%M:%S", errors="coerce")
     dfMES.dropna(subset=["Tiempo actual"], inplace=True)
 
