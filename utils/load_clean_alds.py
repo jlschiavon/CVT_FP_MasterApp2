@@ -45,7 +45,8 @@ def procesar_alds_recken(df):
     # Convertir columnas numéricas
     for col in ['Serie Parts','Rework Parts','Total Parts'] + orden_partes:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-        df_tratado = df.copy(skiprows = 9)
+        df_tratado = df.copy()
+        df_tratado = df.drop(index=[5,6,7,8,9,10,11,12,13], inplace = True)
         
     # ====== CÁLCULO DE TOTALES ======
     
