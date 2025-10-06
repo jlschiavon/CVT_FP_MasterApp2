@@ -412,6 +412,11 @@ elif st.session_state.section == "Production":
     # -------------------------------------------
     st.subheader("⚙ Procesamiento Inicial")
     tabla_recken = []
+
+    if recken_mes_df is None:
+    st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
+
+    
     if st.button("🚀 Process Production Data - Recken"):
         try:
             recken_alds_clean = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
