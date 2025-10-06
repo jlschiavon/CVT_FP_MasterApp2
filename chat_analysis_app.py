@@ -428,7 +428,13 @@ turno_seleccionado = st.radio(
 # ------------------------------
 # PROCESAMIENTO ALDS
 # ------------------------------
-recken_alds_clean, fecha_alds = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
+if recken_alds_df is not None:
+    recken_alds_clean, fecha_alds = cargar_alds({
+        "05 - Overview (Parts worked in stations per shift)": recken_alds_df
+    })
+else:
+    recken_alds_clean, fecha_alds = None, None
+    st.warning("⚠ No se detectó archivo ALDS para Recken. ALDS no se mostrará.")
 
 # Reconstruir fecha del ALDS
 if recken_alds_clean is not None and not recken_alds_clean.empty:
