@@ -415,7 +415,7 @@ elif st.session_state.section == "Production":
     if st.button("🚀 Process Production Data - Recken"):
         try:
             recken_alds_clean = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
-            df_mes = cargar_mes({"correctionQty)": recken_mes})
+            df_mes = cargar_mes({"correctionQty)": recken_mes_df})
 
             if recken_alds_clean is None or recken_alds_clean.empty:
                 st.error("❌ Error: cargar_alds no devolvió datos válidos para Recken.")
@@ -423,7 +423,7 @@ elif st.session_state.section == "Production":
                 st.success("✅ ALDS_Recken generado correctamente")
                 st.dataframe(recken_alds_clean, use_container_width=True)
 
-            if recken_mes is None or recken_mes.empty:
+            if recken_mes_df is None or recken_mes_df.empty:
                 st.error("❌ Error: cargar_mes no devolvió datos válidos para Recken.")
             else:
                 st.success("✅ MES_Recken generado correctamente")
