@@ -428,7 +428,7 @@ turno_seleccionado = st.radio(
 # ------------------------------
 # PROCESAMIENTO ALDS
 # ------------------------------
-#recken_alds_clean, fecha_alds = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
+recken_alds_clean, fecha_alds = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
 
 # Reconstruir fecha del ALDS
 if recken_alds_clean is not None and not recken_alds_clean.empty:
@@ -505,7 +505,7 @@ else:
     
     if st.button("🚀 Process Production Data - Recken"):
         try:
-            recken_alds_clean, fecha_alds = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
+            recken_alds_clean = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
             df_mes = cargar_mes({"correctionQty)": recken_mes_df})
 
             if recken_alds_clean is None or recken_alds_clean.empty:
