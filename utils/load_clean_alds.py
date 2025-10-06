@@ -11,6 +11,7 @@ def cargar_alds(files_dict):
             return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
+df_original = df.copy()
 
 def procesar_alds_recken(df):
     df = df.copy()
@@ -52,7 +53,7 @@ def procesar_alds_recken(df):
     
     for shift in shifts:
         for part in orden_partes:
-            val = df.loc[(df['Shift'] == shift) & (df["Serie Parts"]), part].sum()
+            val = df.loc[(df['Shift'] == shift) & (df["Serie Parts"] > 0), part].sum()
     
             if val > 0:
                 total_series = df.loc[(df['Shift'] == shift) & (df[part] > 0), 'Serie Parts'].sum()
@@ -69,4 +70,4 @@ def procesar_alds_recken(df):
             })
     
     ALDS_Recken = pd.DataFrame(resultados)
-    return ALDS_Recken
+    return df_original
