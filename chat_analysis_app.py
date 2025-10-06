@@ -385,8 +385,8 @@ elif st.session_state.section == "Production":
             if "05" in lower_key:
                 recken_alds_df = df
 
-        # MES (Otros "Overview")
-        elif "correctionQty" in lower_key:
+        # MES (más flexible ahora)
+        elif any(x in lower_key for x in ["correction", "qty", "correctionQty"]):
             recken_mes_df = df
 
         # OEE (SQLReport o Recken)
