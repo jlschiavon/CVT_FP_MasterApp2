@@ -8,7 +8,11 @@ def cargar_alds(files_dict):
     # Buscar el archivo que contenga '05 - overview' dentro de las keys del diccionario
     for key, df in files_dict.items():
         if "05 - overview" in key.lower():
-            return procesar_alds_recken(df)  # ✅ Procesar solo ese dataframe
+            DD = str(df.loc[0, 'Date'].day)
+            MM = str(df.loc[0, 'Date'].month)
+            YYYY = str(df.loc[0, 'Date'].year)
+            fecha_alds = pd.to_datetime(f"{YYYY}-{MM}-{DD}", format="%Y-%m-%d")
+            return procesar_alds_recken(df), fecha_alds  # ✅ Procesar solo ese dataframe
     return None  # Si no se encuentra
 
 def procesar_alds_recken(df):
