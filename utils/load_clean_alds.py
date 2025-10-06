@@ -52,11 +52,14 @@ def procesar_alds_recken(df):
     
     for shift in shifts:
         for part in orden_partes:
-            val = df.loc[(df['Shift'] == shift) & (df["Serie Parts"] > 0), part].sum()
+            val = df.loc[(df['Shift'] == shift) & (df["Serie Parts"]), part].sum()
     
             if val > 0:
                 total_series = df.loc[(df['Shift'] == shift) & (df[part] > 0), 'Serie Parts'].sum()
                 total_rework = val - total_series
+            else:
+                total_series = 0
+                total_rework = 0
     
             resultados.append({
                 "Shift": shift,
