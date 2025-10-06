@@ -405,7 +405,7 @@ elif st.session_state.section == "Production":
         st.warning("⚠ Faltan archivos para iniciar el análisis de Producción Recken.")
         st.stop()
             if recken_mes_df is None:
-            st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
+                st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
     else:
         st.success("✅ Archivos listos para procesar Producción Recken")
 
