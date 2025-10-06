@@ -401,28 +401,6 @@ elif st.session_state.section == "Production":
     st.write(f"MES_Recken: {'✅' if recken_mes_df is not None else '❌'}")
     st.write(f"OEE_Recken: {'✅' if recken_oee_df is not None else '❌'}")
 
-    # ------------------------------
-    # CONTROLES DE FILTRADO
-    # ------------------------------
-    st.subheader("📅 Segmentación de análisis")
-    
-    # Valor por defecto: hoy
-    default_start = date.today()
-    default_end = date.today()
-    
-    fecha_rango = st.date_input(
-        "Selecciona un rango de fechas",
-        value=(default_start, default_end)
-    )
-    
-    turno_seleccionado = st.radio(
-        "Filtrar por turno",
-        ["Todos", "1st Shift", "2nd Shift", "3rd Shift"],
-        horizontal=True
-    )
-
-
-
     # -------------------------------------------
     # 3️⃣ BOTÓN DE PROCESAMIENTO CENTRAL
     # -------------------------------------------
