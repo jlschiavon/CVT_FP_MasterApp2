@@ -370,82 +370,31 @@ elif st.session_state.section == "OEE":
 elif st.session_state.section == "Production":
     st.header("📊 Production - Recken")
 
-    # -------------------------------------------
-    # 1️⃣ DETECCIÓN DE ARCHIVOS RELEVANTES
-    # -------------------------------------------
-    recken_alds_df = None
-    recken_mes_df = None
-    recken_oee_df = None
-
+    # 1️⃣ Detectar archivos
+    recken_alds_df, recken_mes_df, recken_oee_df = None, None, None
     for key, df in st.session_state.files.items():
         lower_key = key.lower()
-
-        # ALDS (Overview archivos tipo 05 o 31)
-        if "overview" in lower_key:
-            if "05" in lower_key:
-                recken_alds_df = df
-
-        # MES (más flexible ahora)
+        if "overview" in lower_key and "05" in lower_key:
+            recken_alds_df = df
         elif any(x in lower_key for x in ["correction", "qty", "correctionQty"]):
             recken_mes_df = df
-
-        # OEE (SQLReport o Recken)
         elif "recken" in lower_key:
             recken_oee_df = df
 
-    # -------------------------------------------
-    # 2️⃣ VISUALIZAR EL ESTADO DE ARCHIVOS
-    # -------------------------------------------
+    # 2️⃣ Mostrar estado
     st.subheader("📦 Archivos Detectados Automáticamente (Recken)")
     st.write(f"ALDS_Recken: {'✅' if recken_alds_df is not None else '❌'}")
     st.write(f"MES_Recken: {'✅' if recken_mes_df is not None else '❌'}")
     st.write(f"OEE_Recken: {'✅' if recken_oee_df is not None else '❌'}")
 
-    if not any([recken_alds_df is not None, recken_mes_df is not None, recken_oee_df is not None]):
+    if not any([recken_alds_df, recken_mes_df, recken_oee_df]):
         st.warning("⚠ Faltan archivos para iniciar el análisis de Producción Recken.")
         st.stop()
-        if recken_mes_df is None:
-            st.warning("⚠ No se encontró archivo MES (correctionQty). Este módulo no podrá procesar MES_Recken.")
-    else:
-        st.success("✅ Archivos listos para procesar Producción Recken")
 
-
-    # -------------------------------------------
-    # 3️⃣ BOTÓN DE PROCESAMIENTO CENTRAL
-    # -------------------------------------------
+    # 3️⃣ Procesamiento
     st.subheader("⚙ Procesamiento Inicial")
-    tabla_recken = []
-    
     if st.button("🚀 Process Production Data - Recken"):
         try:
-            recken_alds_clean = cargar_alds({"05 - Overview (Parts worked in stations per shift)": recken_alds_df})
-            df_mes = cargar_mes({"correctionQty)": recken_mes_df})
-
-            if recken_alds_clean is None or recken_alds_clean.empty:
-                st.error("❌ Error: cargar_alds no devolvió datos válidos para Recken.")
-            else:
-                st.success("✅ ALDS_Recken generado correctamente")
-                st.dataframe(recken_alds_clean, use_container_width=True)
-
-            if recken_mes_df is None or recken_mes_df.empty:
-                st.error("❌ Error: cargar_mes no devolvió datos válidos para Recken.")
-            else:
-                st.success("✅ MES_Recken generado correctamente")
-                st.dataframe(df_mes, use_container_width=True)
-
-                    # 👉 Si ambos existen y tienen datos, unirlos
-            if recken_alds_clean is not None and not recken_alds_clean.empty \
-               and df_mes is not None and not df_mes.empty:
-    
-                # Dependiendo de cómo se relacionan, puedes:
-                # 1. Concatenar (si tienen mismas columnas o quieres apilar uno debajo de otro):
-                #df_final = pd.concat([recken_alds_clean, df_mes], axis=0, ignore_index=True)
-    
-                # 2. O hacer merge (si comparten una clave común como "NO_PARTE" o "FECHA"):
-                df_final = pd.merge(recken_alds_clean, df_mes, on=["Part Number", "Shift"], how="inner")
-    
-                st.success("✅ DataFrames unidos correctamente")
-                st.dataframe(df_final, use_container_width=True)
-
+            alds_clean, df_final = procesar_recken(recken_alds_df, recken_mes_df)
         except Exception as e:
             st.error(f"❌ Error procesando Archivos: {e}")
