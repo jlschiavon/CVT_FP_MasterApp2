@@ -5,7 +5,7 @@ def cargar_mes(file):
     shifts = ["1st Shift", "2nd Shift", "3rd Shift"]
     orden_partes = ["L-0G005-1036-17", "L-0G005-0095-41", "L-0G005-1015-05", "L-0G005-1043-12"]
     partes_full = [parte + "    Chain CVT" for parte in orden_partes]
-    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Parte"])
+    index_completo = pd.MultiIndex.from_product([shifts, orden_partes], names=["Shift", "Part Number"])
 
     # ✅ Nuevo: aceptar diccionario como cargar_alds
     if isinstance(file, dict):
