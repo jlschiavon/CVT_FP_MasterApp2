@@ -42,13 +42,13 @@ def cargar_mes(file):
         .reset_index()
     )
 
-    tabla_mes["Parte"] = tabla_mes["Texto del material"].str.replace(r"\s+Chain CVT$", "", regex=True).str.strip()
+    tabla_mes["Part Number"] = tabla_mes["Texto del material"].str.replace(r"\s+Chain CVT$", "", regex=True).str.strip()
     tabla_mes.drop(columns=["Texto del material"], inplace=True)
     tabla_mes = tabla_mes.rename(columns={"Piezas buenas": "MES"})
 
-    tabla_chatarra["Parte"] = tabla_chatarra["Texto del material"].str.replace(r"\s+Chain CVT$", "", regex=True).str.strip()
+    tabla_chatarra["Part Number"] = tabla_chatarra["Texto del material"].str.replace(r"\s+Chain CVT$", "", regex=True).str.strip()
     tabla_chatarra.drop(columns=["Texto del material"], inplace=True)
     tabla_chatarra = tabla_chatarra.rename(columns={"Chatarra": "MES SCRAP"})
-    tabla_chatarra = tabla_chatarra.set_index(["Shift", "Parte"]).reindex(index_completo, fill_value=0).reset_index()
+    tabla_chatarra = tabla_chatarra.set_index(["Shift", "Part Number"]).reindex(index_completo, fill_value=0).reset_index()
 
-    return pd.merge(tabla_mes, tabla_chatarra, on=["Shift", "Parte"])
+    return pd.merge(tabla_mes, tabla_chatarra, on=["Shift", "Part Number"])
