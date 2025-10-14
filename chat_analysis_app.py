@@ -126,7 +126,7 @@ elif st.session_state.section == "OEE":
         machine_map = {
             "83947050 | Bancos de prueba de tensión (7050)(1)": "Recken 7050 (JATCO)",
             "83947150 | Bancos de prueba de tensión (7150) (1)": "Recken 7150 (HYUNDAI)",
-            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM)",
+            "83947250 | Bancos de prueba de tensión (7250) (1)": "Recken 7250 (GM/SUBARU)",
             "12525645 | Estación de inspección 100% (1)": "VPK 1",
             "12710703 | Estación de inspección 100% (2)": "VPK 2"
         }
@@ -174,7 +174,7 @@ elif st.session_state.section == "OEE":
         return oee_series.mean() * 100
     
     # --- Máquinas ---
-    recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
+    recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM/SUBARU)"]
     vpk_machines = ["VPK 1", "VPK 2"]
     
     # --- Diccionario de OEE por máquina ---
@@ -279,7 +279,7 @@ elif st.session_state.section == "OEE":
     
     # Gráficas Recken
     st.subheader("📊 Gráficas OEE - Recken")
-    recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM)"]
+    recken_machines = ["Recken 7050 (JATCO)", "Recken 7150 (HYUNDAI)", "Recken 7250 (GM/SUBARU)"]
     df_plot = df_filtered[df_filtered["Machine"].isin(recken_machines) & (df_filtered["Shift"]=="Daily")].copy()
     
     if not df_plot.empty:
@@ -287,7 +287,7 @@ elif st.session_state.section == "OEE":
         colors = {
             "Recken 7050 (JATCO)":"#004A30",
             "Recken 7150 (HYUNDAI)":"#003984",
-            "Recken 7250 (GM)":"#0671D8"
+            "Recken 7250 (GM/SUBARU)":"#0671D8"
         }
     
         for machine in recken_machines:
