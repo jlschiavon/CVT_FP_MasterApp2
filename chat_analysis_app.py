@@ -439,10 +439,10 @@ elif st.session_state.section == "Production":
     
                 # Dependiendo de cómo se relacionan, puedes:
                 # 1. Concatenar (si tienen mismas columnas o quieres apilar uno debajo de otro):
-                df_final = pd.concat([recken_alds_clean, df_mes], axis=0, ignore_index=True)
+                #df_final = pd.concat([recken_alds_clean, df_mes], axis=0, ignore_index=True)
     
                 # 2. O hacer merge (si comparten una clave común como "NO_PARTE" o "FECHA"):
-                # df_final = pd.merge(recken_alds_clean, df_mes, on="NO_PARTE", how="inner")
+                df_final = pd.merge(recken_alds_clean, df_mes, on="Part Number", how="inner")
     
                 st.success("✅ DataFrames unidos correctamente")
                 st.dataframe(df_final, use_container_width=True)
